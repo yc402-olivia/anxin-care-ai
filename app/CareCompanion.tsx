@@ -240,7 +240,12 @@ function fileToDataUrl(file: File) {
   });
 }
 
-export function CareCompanion() {
+type CareCompanionProps = {
+  viewerName?: string;
+  signOutHref?: string;
+};
+
+export function CareCompanion({ viewerName, signOutHref }: CareCompanionProps = {}) {
   const [locale, setLocale] = useState<Locale>("zh");
   const [largeText, setLargeText] = useState(() =>
     typeof window !== "undefined" && window.localStorage.getItem("care-text-size") === "large",
@@ -487,6 +492,13 @@ export function CareCompanion() {
           <button className={`size-button ${largeText ? "is-active" : ""}`} type="button" onClick={toggleLargeText} aria-pressed={largeText}>
             <span className="size-aa">A<span>A</span></span> {t.large}
           </button>
+          {viewerName && signOutHref && (
+            <div className="account-menu">
+              <span className="account-avatar" aria-hidden="true">{viewerName.slice(0, 1).toUpperCase()}</span>
+              <span className="account-name">{viewerName}</span>
+              <a href={signOutHref}>登出</a>
+            </div>
+          )}
         </div>
       </header>
 
