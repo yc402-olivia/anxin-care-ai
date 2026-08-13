@@ -503,8 +503,6 @@ export function CareCompanion() {
         </div>
 
         <div className="hero-visual" aria-label="安心陪診整理結果示意">
-          <div className="sun-shape" />
-          <div className="abstract-dots"><i /><i /><i /><i /><i /></div>
           <div className="summary-card">
             <div className="summary-card-top">
               <span className="mini-brand">安</span>
@@ -522,8 +520,6 @@ export function CareCompanion() {
             </ol>
             <div className="mini-actions"><span>◷ 已設提醒</span><span>＋ 加到日曆</span></div>
           </div>
-          <div className="floating-tag tag-voice"><span className="mic-dot">●</span><div><small>語音輸入</small><strong>直接說也可以</strong></div></div>
-          <div className="floating-tag tag-family"><span>家</span><div><small>家人同步</small><strong>重點一起知道</strong></div></div>
         </div>
       </section>
 
