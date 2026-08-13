@@ -1,4 +1,5 @@
 import { jsonError, noStoreJson } from "./http.ts";
+import { authenticateRequest } from "./auth.ts";
 
 type DocumentInput = { kind?: unknown; name?: unknown; dataUrl?: unknown };
 
@@ -29,6 +30,9 @@ function extractOutputText(payload: Record<string, unknown>) {
 }
 
 export async function analyzeCareDocuments(request: Request): Promise<Response> {
+  const authentication = await authenticateRequest(request);
+  if ("response" in authentication) return authentication.response;
+
   let input: Record<string, unknown>;
   try {
     input = await request.json();

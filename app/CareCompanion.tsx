@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Locale = "zh" | "nan" | "hak";
@@ -240,12 +240,7 @@ function fileToDataUrl(file: File) {
   });
 }
 
-type CareCompanionProps = {
-  viewerName?: string;
-  signOutHref?: string;
-};
-
-export function CareCompanion({ viewerName, signOutHref }: CareCompanionProps = {}) {
+export function CareCompanion() {
   const [locale, setLocale] = useState<Locale>("zh");
   const [largeText, setLargeText] = useState(() =>
     typeof window !== "undefined" && window.localStorage.getItem("care-text-size") === "large",
@@ -266,22 +261,55 @@ export function CareCompanion({ viewerName, signOutHref }: CareCompanionProps = 
   const [medicationNote, setMedicationNote] = useState("依藥袋標示的次數與時間服用，不自行增減藥量。");
   const [notice, setNotice] = useState("");
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+  const [authSession, setAuthSession] = useState<Session | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [authConfigured, setAuthConfigured] = useState(true);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [authMessage, setAuthMessage] = useState("");
+  const [loginSubmitting, setLoginSubmitting] = useState(false);
   const [saved, setSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLElement>(null);
   const t = copy[locale];
 
   useEffect(() => {
+    let active = true;
+    let unsubscribe: (() => void) | undefined;
+
     fetch("/api/config")
       .then((response) => response.json())
       .then(async (config) => {
-        if (!config.configured) return;
-        const client = createClient(config.supabaseUrl, config.supabasePublishableKey);
+        if (!config.configured) {
+          if (active) {
+            setAuthConfigured(false);
+            setAuthReady(true);
+          }
+          return;
+        }
+        const client = createClient(config.supabaseUrl, config.supabasePublishableKey, {
+          auth: { flowType: "implicit", detectSessionInUrl: true, persistSession: true, autoRefreshToken: true },
+        });
         const { data } = await client.auth.getSession();
-        if (!data.session) await client.auth.signInAnonymously();
+        if (!active) return;
         setSupabase(client);
+        setAuthSession(data.session);
+        setAuthReady(true);
+        const listener = client.auth.onAuthStateChange((_event, session) => {
+          if (active) setAuthSession(session);
+        });
+        unsubscribe = () => listener.data.subscription.unsubscribe();
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (active) {
+          setAuthConfigured(false);
+          setAuthReady(true);
+        }
+      });
+
+    return () => {
+      active = false;
+      unsubscribe?.();
+    };
   }, []);
 
   useEffect(() => {
@@ -289,6 +317,24 @@ export function CareCompanion({ viewerName, signOutHref }: CareCompanionProps = 
   }, [documents]);
 
   const completedCount = useMemo(() => tasks.filter((task) => task.done).length, [tasks]);
+
+  const sendLoginLink = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!supabase || !loginEmail.trim()) return;
+    setLoginSubmitting(true);
+    setAuthMessage("正在寄送登入連結…");
+    const { error } = await supabase.auth.signInWithOtp({
+      email: loginEmail.trim(),
+      options: { emailRedirectTo: `${window.location.origin}/`, shouldCreateUser: true },
+    });
+    setAuthMessage(error ? `無法寄送：${error.message}` : "登入連結已寄出，請到 Gmail 信箱點擊後回到這個頁面。");
+    setLoginSubmitting(false);
+  };
+
+  const signOut = async () => {
+    await supabase?.auth.signOut();
+    setSaved(false);
+  };
 
   const toggleLargeText = () => {
     setLargeText((current) => {
@@ -396,6 +442,10 @@ export function CareCompanion({ viewerName, signOutHref }: CareCompanionProps = 
   };
 
   const analyze = async () => {
+    if (!authSession?.access_token) {
+      setNotice("登入已過期，請重新登入後再試。");
+      return;
+    }
     setIsAnalyzing(true);
     setNotice("");
     try {
@@ -411,7 +461,7 @@ export function CareCompanion({ viewerName, signOutHref }: CareCompanionProps = 
       };
       const response = await fetch("/api/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authSession.access_token}` },
         body: JSON.stringify(payload),
       });
       const result = (await response.json()) as AnalysisResult;
@@ -468,6 +518,45 @@ export function CareCompanion({ viewerName, signOutHref }: CareCompanionProps = 
     }
   };
 
+  if (!authReady) {
+    return (
+      <main className="auth-shell">
+        <div className="auth-card auth-loading" role="status">
+          <span className="brand-mark"><span>安</span></span>
+          <strong>安心陪診</strong>
+          <p>正在確認登入狀態…</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!authSession) {
+    return (
+      <main className="auth-shell">
+        <section className="auth-card" aria-labelledby="login-title">
+          <div className="auth-brand"><span className="brand-mark"><span>安</span></span><strong>安心陪診</strong></div>
+          <p className="auth-eyebrow">醫生交代，清楚記得</p>
+          <h1 id="login-title">使用 Gmail 登入</h1>
+          <p className="auth-intro">輸入 Email，我們會寄一封安全登入連結給你。不需要另外設定密碼。</p>
+          {authConfigured ? (
+            <form className="login-form" onSubmit={sendLoginLink}>
+              <label htmlFor="login-email">Gmail 或 Email</label>
+              <input id="login-email" type="email" inputMode="email" autoComplete="email" placeholder="name@gmail.com" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} required />
+              <button type="submit" disabled={loginSubmitting}>{loginSubmitting ? "寄送中…" : "寄送登入連結"}<span>→</span></button>
+            </form>
+          ) : (
+            <div className="auth-error">登入服務尚未完成設定，請稍後再試。</div>
+          )}
+          {authMessage && <p className="auth-message" role="status">{authMessage}</p>}
+          <div className="auth-points"><span>✓ 不需密碼</span><span>✓ 個人資料分開保存</span><span>✓ 隨時可以登出</span></div>
+          <p className="auth-safety">安心陪診只協助整理與提醒，不提供診斷或更改醫囑。</p>
+        </section>
+      </main>
+    );
+  }
+
+  const viewerName = authSession.user.email || "已登入";
+
   return (
     <main className="site-shell" data-text-size={largeText ? "large" : "normal"}>
       <header className="topbar">
@@ -492,13 +581,11 @@ export function CareCompanion({ viewerName, signOutHref }: CareCompanionProps = 
           <button className={`size-button ${largeText ? "is-active" : ""}`} type="button" onClick={toggleLargeText} aria-pressed={largeText}>
             <span className="size-aa">A<span>A</span></span> {t.large}
           </button>
-          {viewerName && signOutHref && (
-            <div className="account-menu">
-              <span className="account-avatar" aria-hidden="true">{viewerName.slice(0, 1).toUpperCase()}</span>
-              <span className="account-name">{viewerName}</span>
-              <a href={signOutHref}>登出</a>
-            </div>
-          )}
+          <div className="account-menu">
+            <span className="account-avatar" aria-hidden="true">{viewerName.slice(0, 1).toUpperCase()}</span>
+            <span className="account-name">{viewerName}</span>
+            <button type="button" onClick={signOut}>登出</button>
+          </div>
         </div>
       </header>
 
