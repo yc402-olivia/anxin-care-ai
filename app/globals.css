@@ -15,7 +15,7 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; font-size: 17px; }
 body {
   margin: 0;
   background: var(--cream);
@@ -58,8 +58,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 button { color: inherit; }
 a { color: inherit; text-decoration: none; }
 
-.site-shell { min-height: 100vh; font-size: 16px; }
-.site-shell[data-text-size="large"] { font-size: 19px; }
+.site-shell { min-height: 100vh; font-size: 17px; }
+.site-shell[data-text-size="large"] { font-size: 20px; }
 .site-shell[data-text-size="large"] .hero-intro,
 .site-shell[data-text-size="large"] .section-heading > span,
 .site-shell[data-text-size="large"] .task-card p { font-size: 1em; }
