@@ -48,3 +48,48 @@ test("requires Supabase authentication for AI analysis", async () => {
   assert.match(client, /Authorization: `Bearer \$\{authSession\.access_token\}`/);
   assert.match(server, /authenticateRequest\(request\)/);
 });
+
+test("turns uploaded care documents into structured follow-up tasks", async () => {
+  const [client, server] = await Promise.all([
+    readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../server/analyze.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(server, /type: "json_schema"/);
+  assert.match(server, /detail: "high"/);
+  assert.match(server, /顯示在『後續待辦』下方/);
+  assert.doesNotMatch(server, /demoResult/);
+  assert.match(client, /setTasks\(result\.tasks/);
+  assert.doesNotMatch(client, /setTasks\(initialTasks\)/);
+  assert.match(client, /className="task-empty"/);
+});
+
+test("omits the trial-mode storage notice", async () => {
+  const [client, styles] = await Promise.all([
+    readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.doesNotMatch(client, /試用模式|安全保存|storage-status/);
+  assert.doesNotMatch(styles, /storage-status/);
+});
+
+test("switches the complete preview and AI output language together", async () => {
+  const [client, server] = await Promise.all([
+    readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../server/analyze.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(client, /const changeLocale =/);
+  assert.match(client, /setQuestions\(\[\.\.\.copy\[nextLocale\]\.initialQuestions\]\)/);
+  assert.match(client, /setTasks\(createPreviewTasks\(nextLocale\)\)/);
+  assert.match(client, /summaryKicker: "AI 整理的結果"/);
+  assert.match(client, /summaryKicker: "AI 整理个結果"/);
+  assert.match(client, /locale,\n\s+questions/);
+  assert.match(server, /localized\.languageInstruction/);
+  assert.match(server, /臺灣台語漢字/);
+  assert.match(server, /臺灣四縣腔客語漢字/);
+
+  const renderedInterface = client.slice(client.indexOf("const viewerName"));
+  assert.doesNotMatch(renderedInterface, />重點整理好了<|>這次醫生交代<|>問題清單<|>看診摘要<|>用藥提醒<|>後續待辦</);
+});

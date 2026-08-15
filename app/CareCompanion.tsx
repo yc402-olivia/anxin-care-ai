@@ -28,6 +28,10 @@ type AnalysisResult = {
   warnings: string[];
 };
 
+type AnalysisError = {
+  error?: { code?: string; message?: string };
+};
+
 type SpeechRecognitionEventLike = {
   results: ArrayLike<{ 0: { transcript: string } }>;
 };
@@ -50,8 +54,14 @@ declare global {
 
 const copy = {
   zh: {
+    brand: "安心陪診",
+    homeLabel: "安心陪診首頁",
+    mainNavLabel: "主要導覽",
     language: "語言",
+    selectLanguageLabel: "選擇語言",
     large: "大字",
+    signOut: "登出",
+    localPreview: "本機預覽",
     navPrepare: "看診前",
     navDocuments: "看診資料",
     navTasks: "後續待辦",
@@ -88,13 +98,89 @@ const copy = {
     familyTitle: "家人一看就懂",
     familyText: "不必轉述整段對話，只要把整理好的重點與日期分享出去。",
     ready: "資料已整理完成",
-    demo: "目前是試用模式；連接 Supabase 後會安全保存",
-    saved: "已同步保存這次看診紀錄",
+    previewIntro: "以下是整理結果的預覽，完成上一步後會更新成你的資料。",
+    noTasks: "未從照片辨識到明確待辦，請確認照片清晰後重新上傳。",
     noSpeech: "這個瀏覽器暫不支援語音輸入，可以直接打字。",
+    heroVisualLabel: "安心陪診整理結果示意",
+    miniReady: "重點整理好了",
+    complete: "完成",
+    doctorOrderTitle: "這次醫生交代",
+    doctorOrderText: "照藥袋服藥，先完成抽血，再帶報告回診。",
+    miniTasks: [
+      { title: "按藥袋服藥", detail: "每日早晚 · 飯後", due: "今天" },
+      { title: "完成抽血檢查", detail: "記得帶健保卡", due: "8/26 前" },
+      { title: "回診看報告", detail: "帶藥袋與問題清單", due: "8/30" },
+    ],
+    reminderSet: "已設提醒",
+    addCalendar: "加到日曆",
+    stepsLabel: "使用步驟",
+    initialQuestions: ["這個藥需要吃多久？", "哪些狀況需要提早回診？"],
+    questionList: "問題清單",
+    questionUnit: "題",
+    deleteQuestionLabel: "刪除問題",
+    commonQuestions: "常見問題",
+    documentKinds: {
+      藥袋: { label: "藥袋", hint: "用法、劑量、注意事項" },
+      預約單: { label: "預約單", hint: "檢查、抽血、回診日期" },
+      衛教單: { label: "衛教單", hint: "居家照護與注意事項" },
+    },
+    selectedPhotosLabel: "已選擇的照片",
+    removePhotoLabel: "移除照片",
+    summaryMark: "摘",
+    summaryLabel: "看診摘要",
+    medicationMark: "藥",
+    medicationLabel: "用藥提醒",
+    tasksLabel: "後續待辦",
+    completedLabel: "已完成",
+    markDoneLabel: "標記為完成",
+    markUndoneLabel: "標記為未完成",
+    everyDay: "每天",
+    familyMark: "家",
+    closeNoticeLabel: "關閉通知",
+    footerTagline: "記得醫生的每一句重要交代",
+    footerNoticeTitle: "重要提醒",
+    footerNoticeText: "本服務只協助整理與提醒，不提供診斷、用藥調整或醫療決策。所有內容請以醫師、藥師與醫療院所正式說明為準。",
+    noDocumentsNotice: "請先上傳至少一張看診資料照片。",
+    expiredNotice: "登入已過期，請重新登入後再試。",
+    analyzeFailed: "目前無法整理照片，請稍後再試。",
+    invalidAnalysis: "照片整理結果格式不完整，請重新嘗試。",
+    calendarDescription: "此提醒由安心陪診 AI 整理，請以醫療院所正式資料為準。",
+    calendarFilename: "安心陪診-後續提醒.ics",
+    shareHeading: "【安心陪診｜這次看診重點】",
+    shareReminder: "提醒：內容僅供整理，請以醫療院所正式醫囑為準。",
+    shareTitle: "這次看診重點",
+    loadingLogin: "正在確認登入狀態…",
+    authEyebrow: "醫生交代，清楚記得",
+    authTitle: "使用 Gmail 登入",
+    authIntro: "輸入 Email，我們會寄一封安全登入連結給你。不需要另外設定密碼。",
+    emailLabel: "Gmail 或 Email",
+    sendingLink: "寄送中…",
+    sendLink: "寄送登入連結",
+    authNotConfigured: "登入服務尚未完成設定，請稍後再試。",
+    authNoPassword: "不需密碼",
+    authSeparateData: "個人資料分開保存",
+    authAnytimeSignOut: "隨時可以登出",
+    authSafety: "安心陪診只協助整理與提醒，不提供診斷或更改醫囑。",
+    loginSending: "正在寄送登入連結…",
+    loginFailedPrefix: "無法寄送",
+    loginSent: "登入連結已寄出，請到 Gmail 信箱點擊後回到這個頁面。",
+    previewSummary: "醫師交代按藥袋服藥，並在回診前完成抽血檢查。若出現不舒服，請依院所說明聯絡醫療人員。",
+    previewMedication: "依藥袋標示的次數與時間服用，不自行增減藥量。",
+    previewTasks: [
+      { id: "medication", title: "按藥袋指示服藥", detail: "早晚飯後服用；若有不適，依醫療院所指示聯繫", type: "medication" },
+      { id: "blood-test", title: "8 月 26 日前完成抽血", detail: "依檢驗單說明準備，記得攜帶健保卡", date: "2026-08-26", type: "test" },
+      { id: "follow-up", title: "8 月 30 日回診", detail: "帶本次藥袋、檢驗結果與想問醫生的問題", date: "2026-08-30", type: "visit" },
+    ],
   },
   nan: {
+    brand: "安心陪診",
+    homeLabel: "安心陪診頭頁",
+    mainNavLabel: "主要選單",
     language: "語言",
+    selectLanguageLabel: "揀語言",
     large: "大字",
+    signOut: "登出",
+    localPreview: "本機預覽",
     navPrepare: "看醫生進前",
     navDocuments: "看病資料",
     navTasks: "後續代誌",
@@ -103,7 +189,7 @@ const copy = {
     titleB: "放心予我整理。",
     intro: "共問題、藥袋佮預約單囥入來，AI 會整理做厝裡人攏看會明的重點佮代誌。",
     start: "開始整理這擺看病",
-    listen: "聽功能介紹",
+    listen: "聽功能按怎用",
     steps: ["先記問題", "翕看病資料", "帶清楚代誌轉去"],
     prepareKicker: "看醫生進前",
     prepareTitle: "這擺欲問醫生啥物？",
@@ -120,7 +206,7 @@ const copy = {
     uploaded: "加好矣",
     analyze: "請 AI 共我整理",
     analyzing: "咧讀資料…",
-    summaryKicker: "AI 整理結果",
+    summaryKicker: "AI 整理的結果",
     summaryTitle: "這擺看病，紲落來愛做的代誌",
     read: "讀予我聽",
     stopRead: "莫閣讀",
@@ -131,13 +217,89 @@ const copy = {
     familyTitle: "厝裡人一看就知",
     familyText: "免閣講一大段，共整理好的重點佮日期分享出去就好。",
     ready: "資料整理好矣",
-    demo: "這馬是試用模式；接 Supabase 了後會安全保存",
-    saved: "這擺看病紀錄已經保存",
+    previewIntro: "下跤是整理結果的預覽，頂一步完成了後，就會更新做你的資料。",
+    noTasks: "相片內底無清楚的後續代誌，請共相片翕予較清楚了閣試。",
     noSpeech: "這个瀏覽器猶未支援語音輸入，會使直接拍字。",
+    heroVisualLabel: "安心陪診整理結果的示意",
+    miniReady: "重點整理好矣",
+    complete: "完成矣",
+    doctorOrderTitle: "這擺醫生交代",
+    doctorOrderText: "照藥袋食藥，先去抽血，閣提報告轉去予醫生看。",
+    miniTasks: [
+      { title: "照藥袋食藥", detail: "逐工早暗 · 食飽後", due: "今仔日" },
+      { title: "去做抽血檢查", detail: "愛記得紮健保卡", due: "8/26 進前" },
+      { title: "轉去看報告", detail: "紮藥袋佮問題清單", due: "8/30" },
+    ],
+    reminderSet: "提醒設好矣",
+    addCalendar: "加去日曆",
+    stepsLabel: "按怎使用",
+    initialQuestions: ["這个藥愛食偌久？", "啥物情形愛較早轉去予醫生看？"],
+    questionList: "問題清單",
+    questionUnit: "條",
+    deleteQuestionLabel: "刪掉問題",
+    commonQuestions: "逐家定定問",
+    documentKinds: {
+      藥袋: { label: "藥袋", hint: "食法、份量、愛注意的代誌" },
+      預約單: { label: "預約單", hint: "檢查、抽血、轉去看醫生的日期" },
+      衛教單: { label: "衛教單", hint: "佇厝照顧佮愛注意的代誌" },
+    },
+    selectedPhotosLabel: "揀好的相片",
+    removePhotoLabel: "提掉相片",
+    summaryMark: "摘",
+    summaryLabel: "看病摘要",
+    medicationMark: "藥",
+    medicationLabel: "食藥提醒",
+    tasksLabel: "後續代誌",
+    completedLabel: "做好矣",
+    markDoneLabel: "標做完成",
+    markUndoneLabel: "標做猶未完成",
+    everyDay: "逐工",
+    familyMark: "厝",
+    closeNoticeLabel: "關掉通知",
+    footerTagline: "記牢醫生每一句重要的交代",
+    footerNoticeTitle: "重要提醒",
+    footerNoticeText: "本服務干焦協助整理佮提醒，無提供診斷、改藥抑是醫療決定。所有內容請以醫生、藥師佮醫療院所正式的說明為準。",
+    noDocumentsNotice: "請先傳至少一張看病資料的相片。",
+    expiredNotice: "登入過期矣，請重新登入了閣試。",
+    analyzeFailed: "這馬無法度整理相片，請等一下閣試。",
+    invalidAnalysis: "相片整理的結果無完整，請重新試一擺。",
+    calendarDescription: "這个提醒是安心陪診 AI 整理的，請以醫療院所正式的資料為準。",
+    calendarFilename: "安心陪診-後續代誌.ics",
+    shareHeading: "【安心陪診｜這擺看病重點】",
+    shareReminder: "提醒：內容干焦是整理，請以醫療院所正式的醫囑為準。",
+    shareTitle: "這擺看病重點",
+    loadingLogin: "咧確認登入狀態…",
+    authEyebrow: "醫生交代，清楚記牢",
+    authTitle: "用 Gmail 登入",
+    authIntro: "拍 Email 入來，阮會寄一封安全登入的連結予你，毋免另外設密碼。",
+    emailLabel: "Gmail 抑是 Email",
+    sendingLink: "咧寄…",
+    sendLink: "寄登入連結",
+    authNotConfigured: "登入服務猶未設定好，請等一下閣試。",
+    authNoPassword: "毋免密碼",
+    authSeparateData: "個人資料分開保存",
+    authAnytimeSignOut: "隨時會使登出",
+    authSafety: "安心陪診干焦協助整理佮提醒，無提供診斷抑是改醫囑。",
+    loginSending: "咧寄登入連結…",
+    loginFailedPrefix: "寄袂出去",
+    loginSent: "登入連結寄出去矣，請去 Gmail 信箱撳連結了後轉來這个頁面。",
+    previewSummary: "醫生交代愛照藥袋食藥，閣愛佇轉去看醫生進前完成抽血檢查。若感覺無爽快，請照醫療院所的說明聯絡相關人員。",
+    previewMedication: "照藥袋頂懸寫的次數佮時間食藥，毋通家己加減藥量。",
+    previewTasks: [
+      { id: "medication", title: "照藥袋指示食藥", detail: "早暗食飽後服用；若感覺無爽快，請照醫療院所指示聯絡", type: "medication" },
+      { id: "blood-test", title: "8 月 26 進前完成抽血", detail: "照檢驗單的說明準備，愛記得紮健保卡", date: "2026-08-26", type: "test" },
+      { id: "follow-up", title: "8 月 30 轉去看醫生", detail: "紮這擺的藥袋、檢驗結果佮欲問醫生的問題", date: "2026-08-30", type: "visit" },
+    ],
   },
   hak: {
+    brand: "安心陪診",
+    homeLabel: "安心陪診頭頁",
+    mainNavLabel: "主要選單",
     language: "語言",
+    selectLanguageLabel: "揀語言",
     large: "大字",
+    signOut: "登出",
+    localPreview: "本機預覽",
     navPrepare: "看症前",
     navDocuments: "看症資料",
     navTasks: "過後愛做",
@@ -146,7 +308,7 @@ const copy = {
     titleB: "放心分𠊎整理。",
     intro: "摎問題、藥袋同預約單放入來，AI 會整理做屋下人全看得識个重點同愛做个事。",
     start: "開始整理這擺看症",
-    listen: "聽功能紹介",
+    listen: "聽功能仰般用",
     steps: ["先寫問題", "影看症資料", "帶等清楚事項轉屋"],
     prepareKicker: "看症前",
     prepareTitle: "這擺愛問醫生麼个？",
@@ -154,16 +316,16 @@ const copy = {
     placeholder: "比論：這幾日暗晡頭睡毋落覺，愛注意麼个？",
     voice: "用講个",
     listening: "聽等…",
-    add: "加入問題",
+    add: "加問題",
     suggestions: ["這藥愛食幾久？", "麼个情形愛較遽轉診？", "食東西抑係活動愛注意麼个？"],
     documentsKicker: "看症後",
     documentsTitle: "資料影清楚，交分 AI 整理",
-    documentsIntro: "做得影藥袋、預約單抑係衛教單。相片淨用在這擺整理。",
+    documentsIntro: "做得影藥袋、預約單抑係衛教單。相片淨係用來整理這擺个資料。",
     takePhoto: "影相抑係揀相片",
     uploaded: "加好哩",
-    analyze: "請 AI 摎𠊎整理",
+    analyze: "請 AI 分𠊎整理",
     analyzing: "讀等資料…",
-    summaryKicker: "AI 整理結果",
+    summaryKicker: "AI 整理个結果",
     summaryTitle: "這擺看症，續下來愛做个事",
     read: "讀分𠊎聽",
     stopRead: "莫再讀",
@@ -174,43 +336,91 @@ const copy = {
     familyTitle: "屋下人一看就識",
     familyText: "毋使再講一大段，摎整理好个重點同日期分享出去就好。",
     ready: "資料整理好哩",
-    demo: "這下係試用模式；接 Supabase 過後會安全保存",
-    saved: "這擺看症紀錄已保存",
+    previewIntro: "下背係整理結果个預覽，做好頂一步過後，就會換做你个資料。",
+    noTasks: "相片肚無看著清楚个後續事項，請摎相片影較清楚過後再試。",
     noSpeech: "這隻瀏覽器還吂支援語音輸入，做得直接打字。",
+    heroVisualLabel: "安心陪診整理結果个樣仔",
+    miniReady: "重點整理好哩",
+    complete: "做好哩",
+    doctorOrderTitle: "這擺醫生交代",
+    doctorOrderText: "照藥袋食藥，先做抽血，過後帶報告轉去看症。",
+    miniTasks: [
+      { title: "照藥袋食藥", detail: "逐日朝晨暗晡 · 食飽後", due: "今晡日" },
+      { title: "完成抽血檢查", detail: "愛記得帶健保卡", due: "8/26 以前" },
+      { title: "轉去看報告", detail: "帶藥袋同問題單", due: "8/30" },
+    ],
+    reminderSet: "提醒設好哩",
+    addCalendar: "加到日曆",
+    stepsLabel: "仰般使用",
+    initialQuestions: ["這藥愛食幾久？", "麼个情形愛較遽轉去看症？"],
+    questionList: "問題單",
+    questionUnit: "條",
+    deleteQuestionLabel: "刪忒問題",
+    commonQuestions: "輒常問个問題",
+    documentKinds: {
+      藥袋: { label: "藥袋", hint: "食法、份量、愛注意个事情" },
+      預約單: { label: "預約單", hint: "檢查、抽血、轉去看症个日期" },
+      衛教單: { label: "衛教單", hint: "在屋下照顧同愛注意个事情" },
+    },
+    selectedPhotosLabel: "揀好个相片",
+    removePhotoLabel: "拿忒相片",
+    summaryMark: "撮",
+    summaryLabel: "看症撮要",
+    medicationMark: "藥",
+    medicationLabel: "食藥提醒",
+    tasksLabel: "過後愛做个事",
+    completedLabel: "做好哩",
+    markDoneLabel: "標做做好哩",
+    markUndoneLabel: "標做還吂做好",
+    everyDay: "逐日",
+    familyMark: "屋",
+    closeNoticeLabel: "關忒通知",
+    footerTagline: "記得醫生逐句重要个交代",
+    footerNoticeTitle: "重要提醒",
+    footerNoticeText: "本服務淨係協助整理同提醒，毋會診斷、改藥抑係做醫療決定。所有內容請以醫生、藥師同醫療院所正式个說明為準。",
+    noDocumentsNotice: "請先傳至少一張看症資料个相片。",
+    expiredNotice: "登入過期哩，請重新登入過後再試。",
+    analyzeFailed: "這下無法度整理相片，請等一下再試。",
+    invalidAnalysis: "相片整理个結果毋完整，請重新試一擺。",
+    calendarDescription: "這隻提醒係安心陪診 AI 整理个，請以醫療院所正式个資料為準。",
+    calendarFilename: "安心陪診-過後愛做个事.ics",
+    shareHeading: "【安心陪診｜這擺看症重點】",
+    shareReminder: "提醒：內容淨係整理，請以醫療院所正式个醫囑為準。",
+    shareTitle: "這擺看症重點",
+    loadingLogin: "確認等登入狀態…",
+    authEyebrow: "醫生交代，清楚記得",
+    authTitle: "用 Gmail 登入",
+    authIntro: "輸入 Email，𠊎兜會寄一封安全登入个連結分你，毋使另外設定密碼。",
+    emailLabel: "Gmail 抑係 Email",
+    sendingLink: "寄等…",
+    sendLink: "寄登入連結",
+    authNotConfigured: "登入服務還吂設定好，請等一下再試。",
+    authNoPassword: "毋使密碼",
+    authSeparateData: "個人資料分開保存",
+    authAnytimeSignOut: "幾時都做得登出",
+    authSafety: "安心陪診淨係協助整理同提醒，毋會診斷抑係改醫囑。",
+    loginSending: "寄等登入連結…",
+    loginFailedPrefix: "寄毋出",
+    loginSent: "登入連結寄出哩，請去 Gmail 信箱撳連結過後轉來這隻頁面。",
+    previewSummary: "醫生交代愛照藥袋食藥，還愛在轉去看症以前完成抽血檢查。若係有哪位毋鬆爽，請照醫療院所个說明聯絡醫療人員。",
+    previewMedication: "照藥袋頂項標个擺數同時間食藥，毋好自家加減藥量。",
+    previewTasks: [
+      { id: "medication", title: "照藥袋指示食藥", detail: "朝晨暗晡食飽後服用；若係毋鬆爽，請照醫療院所指示聯絡", type: "medication" },
+      { id: "blood-test", title: "8 月 26 以前完成抽血", detail: "照檢驗單个說明準備，愛記得帶健保卡", date: "2026-08-26", type: "test" },
+      { id: "follow-up", title: "8 月 30 轉去看症", detail: "帶這擺个藥袋、檢驗結果同愛問醫生个問題", date: "2026-08-30", type: "visit" },
+    ],
   },
 } as const;
 
-const documentKinds: Array<{ kind: DocumentKind; mark: string; hint: string }> = [
-  { kind: "藥袋", mark: "藥", hint: "用法、劑量、注意事項" },
-  { kind: "預約單", mark: "約", hint: "檢查、抽血、回診日期" },
-  { kind: "衛教單", mark: "讀", hint: "居家照護與注意事項" },
+const documentKinds: Array<{ kind: DocumentKind; mark: string }> = [
+  { kind: "藥袋", mark: "藥" },
+  { kind: "預約單", mark: "約" },
+  { kind: "衛教單", mark: "讀" },
 ];
 
-const initialTasks: CareTask[] = [
-  {
-    id: "medication",
-    title: "按藥袋指示服藥",
-    detail: "早晚飯後服用；若有不適，依醫療院所指示聯繫",
-    type: "medication",
-    done: false,
-  },
-  {
-    id: "blood-test",
-    title: "8 月 26 日前完成抽血",
-    detail: "依檢驗單說明準備，記得攜帶健保卡",
-    date: "2026-08-26",
-    type: "test",
-    done: false,
-  },
-  {
-    id: "follow-up",
-    title: "8 月 30 日回診",
-    detail: "帶本次藥袋、檢驗結果與想問醫生的問題",
-    date: "2026-08-30",
-    type: "visit",
-    done: false,
-  },
-];
+function createPreviewTasks(locale: Locale): CareTask[] {
+  return copy[locale].previewTasks.map((task) => ({ ...task, done: false }));
+}
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
@@ -291,19 +501,16 @@ export function CareCompanion() {
     typeof window !== "undefined" && window.localStorage.getItem("care-text-size") === "large",
   );
   const [question, setQuestion] = useState("");
-  const [questions, setQuestions] = useState<string[]>([
-    "這個藥需要吃多久？",
-    "哪些狀況需要提早回診？",
-  ]);
+  const [questions, setQuestions] = useState<string[]>([...copy.zh.initialQuestions]);
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
   const [activeKind, setActiveKind] = useState<DocumentKind>("藥袋");
   const [isListening, setIsListening] = useState(false);
   const [isReading, setIsReading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
-  const [tasks, setTasks] = useState<CareTask[]>(initialTasks);
-  const [summary, setSummary] = useState("醫師交代按藥袋服藥，並在回診前完成抽血檢查。若出現不舒服，請依院所說明聯絡醫療人員。");
-  const [medicationNote, setMedicationNote] = useState("依藥袋標示的次數與時間服用，不自行增減藥量。");
+  const [tasks, setTasks] = useState<CareTask[]>(() => createPreviewTasks("zh"));
+  const [summary, setSummary] = useState(copy.zh.previewSummary);
+  const [medicationNote, setMedicationNote] = useState(copy.zh.previewMedication);
   const [notice, setNotice] = useState("");
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
   const [authSession, setAuthSession] = useState<Session | null>(null);
@@ -312,7 +519,6 @@ export function CareCompanion() {
   const [loginEmail, setLoginEmail] = useState("");
   const [authMessage, setAuthMessage] = useState("");
   const [loginSubmitting, setLoginSubmitting] = useState(false);
-  const [saved, setSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLElement>(null);
   const t = copy[locale];
@@ -367,18 +573,30 @@ export function CareCompanion() {
     event.preventDefault();
     if (!supabase || !loginEmail.trim()) return;
     setLoginSubmitting(true);
-    setAuthMessage("正在寄送登入連結…");
+    setAuthMessage(t.loginSending);
     const { error } = await supabase.auth.signInWithOtp({
       email: loginEmail.trim(),
       options: { emailRedirectTo: `${window.location.origin}/`, shouldCreateUser: true },
     });
-    setAuthMessage(error ? `無法寄送：${error.message}` : "登入連結已寄出，請到 Gmail 信箱點擊後回到這個頁面。");
+    setAuthMessage(error ? t.loginFailedPrefix : t.loginSent);
     setLoginSubmitting(false);
   };
 
   const signOut = async () => {
     await supabase?.auth.signOut();
-    setSaved(false);
+  };
+
+  const changeLocale = (nextLocale: Locale) => {
+    window.speechSynthesis?.cancel();
+    setIsReading(false);
+    setLocale(nextLocale);
+    setQuestion("");
+    setQuestions([...copy[nextLocale].initialQuestions]);
+    setSummary(copy[nextLocale].previewSummary);
+    setMedicationNote(copy[nextLocale].previewMedication);
+    setTasks(createPreviewTasks(nextLocale));
+    setHasAnalyzed(false);
+    setNotice("");
   };
 
   const toggleLargeText = () => {
@@ -487,18 +705,22 @@ export function CareCompanion() {
         }
       }),
     );
-    setSaved(true);
   };
 
   const analyze = async () => {
+    if (documents.length === 0) {
+      setNotice(t.noDocumentsNotice);
+      return;
+    }
     if (!authSession?.access_token) {
-      setNotice("登入已過期，請重新登入後再試。");
+      setNotice(t.expiredNotice);
       return;
     }
     setIsAnalyzing(true);
     setNotice("");
     try {
       const payload = {
+        locale,
         questions,
         documents: await Promise.all(
           documents.map(async (document) => ({
@@ -513,19 +735,27 @@ export function CareCompanion() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${authSession.access_token}` },
         body: JSON.stringify(payload),
       });
-      const result = (await response.json()) as AnalysisResult;
-      if (!response.ok) throw new Error("analysis failed");
+      const responseBody = (await response.json()) as AnalysisResult | AnalysisError;
+      if (!response.ok) {
+        const error = responseBody as AnalysisError;
+        if (error.error?.code?.startsWith("AUTH_") || error.error?.code === "SUPABASE_NOT_CONFIGURED") {
+          throw new Error(t.expiredNotice);
+        }
+        throw new Error(error.error?.message || t.analyzeFailed);
+      }
+      const result = responseBody as AnalysisResult;
+      if (!result.summary || !Array.isArray(result.tasks) || !Array.isArray(result.warnings)) {
+        throw new Error(t.invalidAnalysis);
+      }
       setSummary(result.summary);
       setMedicationNote(result.medicationNote);
       setTasks(result.tasks.map((task) => ({ ...task, done: false })));
       setHasAnalyzed(true);
       await persistVisit(result);
+      setNotice(result.warnings.filter(Boolean).join(" "));
       window.setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
-    } catch {
-      setHasAnalyzed(true);
-      setTasks(initialTasks);
-      setNotice("目前先顯示示範整理結果；連接服務後即可讀取實際資料。");
-      window.setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : t.analyzeFailed);
     } finally {
       setIsAnalyzing(false);
     }
@@ -543,7 +773,7 @@ export function CareCompanion() {
           `DTSTART;VALUE=DATE:${toIcsDate(date)}`,
           `DTEND;VALUE=DATE:${toIcsDate(tomorrow(date))}`,
           `SUMMARY:${escapeIcs(task.title)}`,
-          `DESCRIPTION:${escapeIcs(task.detail)}\\n此提醒由安心陪診 AI 整理，請以醫療院所正式資料為準。`,
+          `DESCRIPTION:${escapeIcs(task.detail)}\\n${escapeIcs(t.calendarDescription)}`,
           "END:VEVENT",
         ].join("\r\n");
       })
@@ -552,15 +782,15 @@ export function CareCompanion() {
     const url = URL.createObjectURL(new Blob([content], { type: "text/calendar;charset=utf-8" }));
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = "安心陪診-後續提醒.ics";
+    anchor.download = t.calendarFilename;
     anchor.click();
     URL.revokeObjectURL(url);
   };
 
   const shareSummary = async () => {
-    const text = [`【安心陪診｜這次看診重點】`, summary, "", ...tasks.map((task, index) => `${index + 1}. ${task.title}｜${task.detail}`), "", "提醒：內容僅供整理，請以醫療院所正式醫囑為準。"].join("\n");
+    const text = [t.shareHeading, summary, "", ...tasks.map((task, index) => `${index + 1}. ${task.title}｜${task.detail}`), "", t.shareReminder].join("\n");
     if (navigator.share) {
-      await navigator.share({ title: "這次看診重點", text }).catch(() => undefined);
+      await navigator.share({ title: t.shareTitle, text }).catch(() => undefined);
     } else {
       await navigator.clipboard.writeText(text);
       setNotice(t.copied);
@@ -572,8 +802,8 @@ export function CareCompanion() {
       <main className="auth-shell">
         <div className="auth-card auth-loading" role="status">
           <span className="brand-mark"><span>安</span></span>
-          <strong>安心陪診</strong>
-          <p>正在確認登入狀態…</p>
+          <strong>{t.brand}</strong>
+          <p>{t.loadingLogin}</p>
         </div>
       </main>
     );
@@ -585,37 +815,37 @@ export function CareCompanion() {
     return (
       <main className="auth-shell">
         <section className="auth-card" aria-labelledby="login-title">
-          <div className="auth-brand"><span className="brand-mark"><span>安</span></span><strong>安心陪診</strong></div>
-          <p className="auth-eyebrow">醫生交代，清楚記得</p>
-          <h1 id="login-title">使用 Gmail 登入</h1>
-          <p className="auth-intro">輸入 Email，我們會寄一封安全登入連結給你。不需要另外設定密碼。</p>
+          <div className="auth-brand"><span className="brand-mark"><span>安</span></span><strong>{t.brand}</strong></div>
+          <p className="auth-eyebrow">{t.authEyebrow}</p>
+          <h1 id="login-title">{t.authTitle}</h1>
+          <p className="auth-intro">{t.authIntro}</p>
           {authConfigured ? (
             <form className="login-form" onSubmit={sendLoginLink}>
-              <label htmlFor="login-email">Gmail 或 Email</label>
+              <label htmlFor="login-email">{t.emailLabel}</label>
               <input id="login-email" type="email" inputMode="email" autoComplete="email" placeholder="name@gmail.com" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} required />
-              <button type="submit" disabled={loginSubmitting}>{loginSubmitting ? "寄送中…" : "寄送登入連結"}<span>→</span></button>
+              <button type="submit" disabled={loginSubmitting}>{loginSubmitting ? t.sendingLink : t.sendLink}<span>→</span></button>
             </form>
           ) : (
-            <div className="auth-error">登入服務尚未完成設定，請稍後再試。</div>
+            <div className="auth-error">{t.authNotConfigured}</div>
           )}
           {authMessage && <p className="auth-message" role="status">{authMessage}</p>}
-          <div className="auth-points"><span>✓ 不需密碼</span><span>✓ 個人資料分開保存</span><span>✓ 隨時可以登出</span></div>
-          <p className="auth-safety">安心陪診只協助整理與提醒，不提供診斷或更改醫囑。</p>
+          <div className="auth-points"><span>✓ {t.authNoPassword}</span><span>✓ {t.authSeparateData}</span><span>✓ {t.authAnytimeSignOut}</span></div>
+          <p className="auth-safety">{t.authSafety}</p>
         </section>
       </main>
     );
   }
 
-  const viewerName = authSession?.user.email || "本機預覽";
+  const viewerName = authSession?.user.email || t.localPreview;
 
   return (
     <main className="site-shell" data-text-size={largeText ? "large" : "normal"}>
       <header className="topbar">
-        <a className="brand" href="#top" aria-label="安心陪診首頁">
+        <a className="brand" href="#top" aria-label={t.homeLabel}>
           <span className="brand-mark"><span>安</span></span>
-          <span>安心陪診</span>
+          <span>{t.brand}</span>
         </a>
-        <nav aria-label="主要導覽">
+        <nav aria-label={t.mainNavLabel}>
           <a href="#prepare">{t.navPrepare}</a>
           <a href="#documents">{t.navDocuments}</a>
           <a href="#result">{t.navTasks}</a>
@@ -623,7 +853,7 @@ export function CareCompanion() {
         <div className="accessibility-tools">
           <label className="language-select">
             <span>{t.language}</span>
-            <select value={locale} onChange={(event) => setLocale(event.target.value as Locale)} aria-label="選擇語言">
+            <select value={locale} onChange={(event) => changeLocale(event.target.value as Locale)} aria-label={t.selectLanguageLabel}>
               <option value="zh">華語</option>
               <option value="nan">台語</option>
               <option value="hak">客語</option>
@@ -635,7 +865,7 @@ export function CareCompanion() {
           <div className="account-menu">
             <span className="account-avatar" aria-hidden="true">{viewerName.slice(0, 1).toUpperCase()}</span>
             <span className="account-name">{viewerName}</span>
-            <button type="button" onClick={signOut}>登出</button>
+            <button type="button" onClick={signOut}>{t.signOut}</button>
           </div>
         </div>
       </header>
@@ -651,28 +881,26 @@ export function CareCompanion() {
           </div>
         </div>
 
-        <div className="hero-visual" aria-label="安心陪診整理結果示意">
+        <div className="hero-visual" aria-label={t.heroVisualLabel}>
           <div className="summary-card">
             <div className="summary-card-top">
               <span className="mini-brand">安</span>
-              <span><small>安心陪診 AI</small><strong>重點整理好了</strong></span>
-              <span className="status-dot">完成</span>
+              <span><small>{t.brand} AI</small><strong>{t.miniReady}</strong></span>
+              <span className="status-dot">{t.complete}</span>
             </div>
             <div className="doctor-note">
               <span className="doctor-avatar">醫</span>
-              <div><strong>這次醫生交代</strong><p>照藥袋服藥，先完成抽血，再帶報告回診。</p></div>
+              <div><strong>{t.doctorOrderTitle}</strong><p>{t.doctorOrderText}</p></div>
             </div>
             <ol className="mini-tasks">
-              <li><span>1</span><div><strong>按藥袋服藥</strong><small>每日早晚 · 飯後</small></div><b>今天</b></li>
-              <li><span>2</span><div><strong>完成抽血檢查</strong><small>記得帶健保卡</small></div><b>8/26 前</b></li>
-              <li><span>3</span><div><strong>回診看報告</strong><small>帶藥袋與問題清單</small></div><b>8/30</b></li>
+              {t.miniTasks.map((task, index) => <li key={task.title}><span>{index + 1}</span><div><strong>{task.title}</strong><small>{task.detail}</small></div><b>{task.due}</b></li>)}
             </ol>
-            <div className="mini-actions"><span>◷ 已設提醒</span><span>＋ 加到日曆</span></div>
+            <div className="mini-actions"><span>◷ {t.reminderSet}</span><span>＋ {t.addCalendar}</span></div>
           </div>
         </div>
       </section>
 
-      <section className="step-ribbon" aria-label="使用步驟">
+      <section className="step-ribbon" aria-label={t.stepsLabel}>
         {t.steps.map((step, index) => <div key={step}><span>{pad(index + 1)}</span><strong>{step}</strong>{index < 2 && <i aria-hidden="true">→</i>}</div>)}
       </section>
 
@@ -691,17 +919,17 @@ export function CareCompanion() {
             </div>
           </div>
           <div className="question-list">
-            <div className="list-label"><span>問題清單</span><b>{questions.length} 題</b></div>
+            <div className="list-label"><span>{t.questionList}</span><b>{questions.length} {t.questionUnit}</b></div>
             {questions.map((item, index) => (
               <div className="question-item" key={`${item}-${index}`}>
                 <span>{index + 1}</span><p>{item}</p>
-                <button type="button" aria-label={`刪除問題：${item}`} onClick={() => setQuestions((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button>
+                <button type="button" aria-label={`${t.deleteQuestionLabel}：${item}`} onClick={() => setQuestions((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button>
               </div>
             ))}
           </div>
         </div>
         <div className="suggestion-row">
-          <span>常見問題</span>
+          <span>{t.commonQuestions}</span>
           {t.suggestions.map((item) => <button key={item} type="button" onClick={() => addQuestion(item)}>＋ {item}</button>)}
         </div>
       </section>
@@ -716,28 +944,29 @@ export function CareCompanion() {
         <div className="document-grid">
           {documentKinds.map((item) => {
             const count = documents.filter((document) => document.kind === item.kind).length;
+            const documentCopy = t.documentKinds[item.kind];
             return (
               <button className="document-card" type="button" key={item.kind} onClick={() => chooseFiles(item.kind)}>
                 <span className="document-mark">{item.mark}</span>
-                <span><strong>{item.kind}</strong><small>{item.hint}</small></span>
+                <span><strong>{documentCopy.label}</strong><small>{documentCopy.hint}</small></span>
                 <b>{count > 0 ? `${count} ${t.uploaded}` : "＋"}</b>
               </button>
             );
           })}
         </div>
         {documents.length > 0 && (
-          <div className="photo-strip" aria-label="已選擇的照片">
+          <div className="photo-strip" aria-label={t.selectedPhotosLabel}>
             {documents.map((document, index) => (
               <div className="photo-thumb" key={`${document.file.name}-${index}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={document.preview} alt={`${document.kind}：${document.file.name}`} />
-                <span>{document.kind}</span>
-                <button type="button" aria-label={`移除 ${document.file.name}`} onClick={() => setDocuments((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button>
+                <img src={document.preview} alt={`${t.documentKinds[document.kind].label}：${document.file.name}`} />
+                <span>{t.documentKinds[document.kind].label}</span>
+                <button type="button" aria-label={`${t.removePhotoLabel}：${document.file.name}`} onClick={() => setDocuments((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button>
               </div>
             ))}
           </div>
         )}
-        <button className="analyze-button" type="button" onClick={analyze} disabled={isAnalyzing}>
+        <button className="analyze-button" type="button" onClick={analyze} disabled={isAnalyzing || documents.length === 0}>
           <span className="ai-spark">✦</span>
           {isAnalyzing ? t.analyzing : t.analyze}
           <span aria-hidden="true">→</span>
@@ -748,42 +977,41 @@ export function CareCompanion() {
         <div className="section-heading result-heading">
           <p>{t.summaryKicker}</p>
           <h2>{t.summaryTitle}</h2>
-          <span>{hasAnalyzed ? t.ready : "以下是整理結果的預覽，完成上一步後會更新成你的資料。"}</span>
+          <span>{hasAnalyzed ? t.ready : t.previewIntro}</span>
         </div>
         <div className="result-layout">
           <div className="result-main">
             <div className="visit-summary">
-              <div className="summary-icon">摘</div>
-              <div><span>看診摘要</span><p>{summary}</p></div>
+              <div className="summary-icon">{t.summaryMark}</div>
+              <div><span>{t.summaryLabel}</span><p>{summary}</p></div>
               <button type="button" onClick={() => speak(summary)}>{isReading ? "■" : "▶"}<span>{isReading ? t.stopRead : t.read}</span></button>
             </div>
-            <div className="medication-banner"><span>藥</span><div><strong>用藥提醒</strong><p>{medicationNote}</p></div></div>
-            <div className="task-header"><strong>後續待辦</strong><span>{completedCount} / {tasks.length} 已完成</span></div>
+            <div className="medication-banner"><span>{t.medicationMark}</span><div><strong>{t.medicationLabel}</strong><p>{medicationNote}</p></div></div>
+            <div className="task-header"><strong>{t.tasksLabel}</strong><span>{completedCount} / {tasks.length} {t.completedLabel}</span></div>
             <div className="task-list">
-              {tasks.map((task, index) => (
+              {tasks.length === 0 ? <div className="task-empty">{t.noTasks}</div> : tasks.map((task, index) => (
                 <article className={`task-card ${task.done ? "is-done" : ""}`} key={task.id}>
-                  <button className="task-check" type="button" onClick={() => setTasks((current) => current.map((item) => item.id === task.id ? { ...item, done: !item.done } : item))} aria-label={task.done ? `標記 ${task.title} 為未完成` : `標記 ${task.title} 為完成`}>{task.done ? "✓" : index + 1}</button>
+                  <button className="task-check" type="button" onClick={() => setTasks((current) => current.map((item) => item.id === task.id ? { ...item, done: !item.done } : item))} aria-label={`${task.done ? t.markUndoneLabel : t.markDoneLabel}：${task.title}`}>{task.done ? "✓" : index + 1}</button>
                   <div className="task-copy"><strong>{task.title}</strong><p>{task.detail}</p></div>
-                  {task.date ? <button className="calendar-one" type="button" onClick={() => downloadCalendar([task])}><span>＋</span>{t.calendarOne}</button> : <span className="today-pill">每天</span>}
+                  {task.date ? <button className="calendar-one" type="button" onClick={() => downloadCalendar([task])}><span>＋</span>{t.calendarOne}</button> : <span className="today-pill">{t.everyDay}</span>}
                 </article>
               ))}
             </div>
           </div>
           <aside className="family-card">
-            <div className="family-orbit"><span>家</span><i>✓</i></div>
+            <div className="family-orbit"><span>{t.familyMark}</span><i>✓</i></div>
             <h3>{t.familyTitle}</h3>
             <p>{t.familyText}</p>
             <button type="button" onClick={() => downloadCalendar()}><span>▣</span>{t.calendar}</button>
             <button type="button" className="share-button" onClick={shareSummary}><span>↗</span>{t.share}</button>
-            <div className="storage-status"><i />{saved ? t.saved : t.demo}</div>
           </aside>
         </div>
-        {notice && <div className="toast" role="status">{notice}<button type="button" onClick={() => setNotice("")} aria-label="關閉通知">×</button></div>}
+        {notice && <div className="toast" role="status">{notice}<button type="button" onClick={() => setNotice("")} aria-label={t.closeNoticeLabel}>×</button></div>}
       </section>
 
       <footer>
-        <div className="footer-brand"><span className="brand-mark"><span>安</span></span><div><strong>安心陪診</strong><small>記得醫生的每一句重要交代</small></div></div>
-        <p><strong>重要提醒</strong>{"　"}本服務只協助整理與提醒，不提供診斷、用藥調整或醫療決策。所有內容請以醫師、藥師與醫療院所正式說明為準。</p>
+        <div className="footer-brand"><span className="brand-mark"><span>安</span></span><div><strong>{t.brand}</strong><small>{t.footerTagline}</small></div></div>
+        <p><strong>{t.footerNoticeTitle}</strong>{"　"}{t.footerNoticeText}</p>
       </footer>
     </main>
   );
