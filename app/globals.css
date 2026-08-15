@@ -166,8 +166,6 @@ h1 em { font-style: normal; color: var(--green); white-space: nowrap; }
 .sound-bars { display: flex; align-items: center; gap: 2px; height: 18px; }
 .sound-bars i { display: block; width: 3px; border-radius: 2px; background: var(--orange); }
 .sound-bars i:nth-child(1) { height: 9px; }.sound-bars i:nth-child(2) { height: 17px; }.sound-bars i:nth-child(3) { height: 12px; }
-.safety-note { display: flex; align-items: center; gap: 8px; margin: 18px 0 0; color: var(--muted); font-size: .76em; font-weight: 700; }
-.safety-note span { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: var(--green-soft); color: var(--green); }
 
 .hero-visual { min-width: 0; }
 .summary-card {
@@ -214,7 +212,7 @@ h1 em { font-style: normal; color: var(--green); white-space: nowrap; }
 
 .workflow-section { padding: 82px max(24px, calc((100vw - 1040px) / 2)); }
 .section-heading { text-align: center; max-width: 680px; margin: 0 auto 36px; }
-.section-heading > p { margin: 0 0 11px; color: var(--orange); font-size: .72em; font-weight: 900; letter-spacing: .16em; }
+.section-heading > p { width: 100%; margin: 0 0 11px; color: var(--orange); font-size: .72em; font-weight: 900; letter-spacing: .16em; text-align: center; }
 .section-heading h2 { margin: 0; font-family: Georgia, "Noto Serif TC", serif; font-size: clamp(1.9rem, 3vw, 2.7rem); line-height: 1.25; letter-spacing: -.02em; }
 .section-heading > span { display: block; margin-top: 12px; color: var(--muted); font-size: .88em; line-height: 1.7; }
 
@@ -242,7 +240,7 @@ h1 em { font-style: normal; color: var(--green); white-space: nowrap; }
 .document-card:hover { border-color: var(--green); box-shadow: var(--shadow); }
 .document-mark { width: 45px; height: 45px; border-radius: 12px; display: grid; place-items: center; background: var(--orange-soft); color: #934621; font-family: Georgia, serif; font-weight: 900; }.document-card > span:nth-child(2) { display: flex; flex-direction: column; gap: 5px; }.document-card strong { font-size: .88em; }.document-card small { color: var(--muted); font-size: .63em; line-height: 1.4; }.document-card b { color: var(--green); font-size: .82em; }
 .photo-strip { margin: 16px auto 0; display: flex; gap: 11px; overflow-x: auto; padding: 3px 2px 8px; }.photo-thumb { flex: 0 0 116px; height: 92px; border-radius: 12px; overflow: hidden; position: relative; border: 2px solid white; background: white; box-shadow: 0 3px 10px rgba(24,52,47,.08); }.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }.photo-thumb span { position: absolute; left: 6px; bottom: 6px; background: rgba(23,77,67,.92); color: white; font-size: .6em; padding: 4px 7px; border-radius: 10px; }.photo-thumb button { position: absolute; right: 4px; top: 4px; width: 24px; height: 24px; border: 0; border-radius: 50%; background: rgba(0,0,0,.58); color: white; cursor: pointer; }
-.analyze-button { min-width: 300px; min-height: 56px; margin: 28px auto 0; padding: 0 22px; border: 0; border-radius: 11px; background: var(--green); color: white; font-weight: 900; display: flex; align-items: center; justify-content: space-between; gap: 14px; cursor: pointer; }.analyze-button:hover { background: var(--green-dark); }.analyze-button:disabled { cursor: wait; opacity: .65; }.ai-spark { color: #ffc99e; font-size: 1.2em; }.privacy-line { text-align: center; color: var(--muted); font-size: .66em; margin: 12px 0 0; }
+.analyze-button { min-width: 300px; min-height: 56px; margin: 28px auto 0; padding: 0 22px; border: 0; border-radius: 11px; background: var(--green); color: white; font-weight: 900; display: flex; align-items: center; justify-content: space-between; gap: 14px; cursor: pointer; }.analyze-button:hover { background: var(--green-dark); }.analyze-button:disabled { cursor: wait; opacity: .65; }.ai-spark { color: #ffc99e; font-size: 1.2em; }
 
 .result-section { position: relative; padding: 82px max(24px, calc((100vw - 1080px) / 2)) 92px; background: var(--paper); border-top: 1px solid var(--line); }
 .result-section::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 56px; height: 4px; border-radius: 0 0 4px 4px; background: var(--orange); }

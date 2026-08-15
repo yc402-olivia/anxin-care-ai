@@ -58,12 +58,11 @@ const copy = {
     eyebrow: "陪你記得每一件重要的事",
     titleA: "醫生說的，",
     titleB: "放心交給我整理。",
-    intro: "把問題、藥袋和預約單放進來，AI 會整理成家人都看得懂的重點與待辦。",
+    intro: "把問題、藥袋和預約單放進來，人工智能會整理成家人都看得懂的重點與待辦。",
     start: "開始整理這次看診",
     listen: "聽功能介紹",
-    safety: "只整理與提醒，不提供診斷或更改醫囑",
     steps: ["先記下問題", "拍下看診資料", "帶走清楚待辦"],
-    prepareKicker: "01 · 看診前",
+    prepareKicker: "看診前",
     prepareTitle: "這次想問醫生什麼？",
     prepareIntro: "想到什麼就先記下來，也可以按麥克風直接說。",
     placeholder: "例如：最近晚上常常睡不好，需要注意什麼？",
@@ -71,14 +70,14 @@ const copy = {
     listening: "正在聽…",
     add: "加入問題",
     suggestions: ["這個藥要吃多久？", "什麼情況要提早回診？", "飲食或活動要注意什麼？"],
-    documentsKicker: "02 · 看診後",
+    documentsKicker: "看診後",
     documentsTitle: "把資料拍清楚，交給 AI 整理",
     documentsIntro: "可拍藥袋、預約單或衛教單。照片只用於本次整理。",
     takePhoto: "拍照或選照片",
     uploaded: "已加入",
     analyze: "請 AI 幫我整理",
     analyzing: "正在讀取資料…",
-    summaryKicker: "03 · AI 整理結果",
+    summaryKicker: "AI 整理結果",
     summaryTitle: "這次看診，接下來要做的事",
     read: "唸給我聽",
     stopRead: "停止朗讀",
@@ -105,9 +104,8 @@ const copy = {
     intro: "共問題、藥袋佮預約單囥入來，AI 會整理做厝裡人攏看會明的重點佮代誌。",
     start: "開始整理這擺看病",
     listen: "聽功能介紹",
-    safety: "干焦整理佮提醒，無診斷、無改醫生交代",
     steps: ["先記問題", "翕看病資料", "帶清楚代誌轉去"],
-    prepareKicker: "01 · 看醫生進前",
+    prepareKicker: "看醫生進前",
     prepareTitle: "這擺欲問醫生啥物？",
     prepareIntro: "想著就先記落來，也會使撳麥克風直接講。",
     placeholder: "親像：這幾工暗時攏睏袂好，愛注意啥物？",
@@ -115,14 +113,14 @@ const copy = {
     listening: "咧聽…",
     add: "加問題",
     suggestions: ["這个藥愛食偌久？", "啥物情形愛較早轉去予醫生看？", "食物抑是活動愛注意啥物？"],
-    documentsKicker: "02 · 看醫生了後",
+    documentsKicker: "看醫生了後",
     documentsTitle: "共資料翕予清楚，交予 AI 整理",
     documentsIntro: "會使翕藥袋、預約單抑是衛教單。相片干焦用佇這擺整理。",
     takePhoto: "翕相抑是揀相片",
     uploaded: "加好矣",
     analyze: "請 AI 共我整理",
     analyzing: "咧讀資料…",
-    summaryKicker: "03 · AI 整理結果",
+    summaryKicker: "AI 整理結果",
     summaryTitle: "這擺看病，紲落來愛做的代誌",
     read: "讀予我聽",
     stopRead: "莫閣讀",
@@ -149,9 +147,8 @@ const copy = {
     intro: "摎問題、藥袋同預約單放入來，AI 會整理做屋下人全看得識个重點同愛做个事。",
     start: "開始整理這擺看症",
     listen: "聽功能紹介",
-    safety: "淨整理同提醒，毋診斷、毋改醫生交代",
     steps: ["先寫問題", "影看症資料", "帶等清楚事項轉屋"],
-    prepareKicker: "01 · 看症前",
+    prepareKicker: "看症前",
     prepareTitle: "這擺愛問醫生麼个？",
     prepareIntro: "想著就先寫下來，也做得撳麥克風直接講。",
     placeholder: "比論：這幾日暗晡頭睡毋落覺，愛注意麼个？",
@@ -159,14 +156,14 @@ const copy = {
     listening: "聽等…",
     add: "加入問題",
     suggestions: ["這藥愛食幾久？", "麼个情形愛較遽轉診？", "食東西抑係活動愛注意麼个？"],
-    documentsKicker: "02 · 看症後",
+    documentsKicker: "看症後",
     documentsTitle: "資料影清楚，交分 AI 整理",
     documentsIntro: "做得影藥袋、預約單抑係衛教單。相片淨用在這擺整理。",
     takePhoto: "影相抑係揀相片",
     uploaded: "加好哩",
     analyze: "請 AI 摎𠊎整理",
     analyzing: "讀等資料…",
-    summaryKicker: "03 · AI 整理結果",
+    summaryKicker: "AI 整理結果",
     summaryTitle: "這擺看症，續下來愛做个事",
     read: "讀分𠊎聽",
     stopRead: "莫再讀",
@@ -229,6 +226,54 @@ function tomorrow(date: Date) {
 
 function escapeIcs(value: string) {
   return value.replace(/\\/g, "\\\\").replace(/,/g, "\\,").replace(/;/g, "\\;").replace(/\n/g, "\\n");
+}
+
+function chooseTaiwaneseFemaleVoice(voices: SpeechSynthesisVoice[]) {
+  const naturalVoiceKeywords = [
+    "natural",
+    "enhanced",
+    "premium",
+    "siri",
+    "google",
+  ];
+  const femaleVoiceKeywords = [
+    "hsiaochen",
+    "hsiao-chen",
+    "hsiaoyu",
+    "hsiao-yu",
+    "yating",
+    "hanhan",
+    "meijia",
+    "mei-jia",
+    "美佳",
+    "曉辰",
+    "曉雨",
+    "雅婷",
+    "涵涵",
+    "國語（臺灣）",
+    "國語 (臺灣)",
+  ];
+
+  return voices
+    .filter((voice) => voice.lang.toLowerCase().replace("_", "-") === "zh-tw")
+    .filter((voice) => femaleVoiceKeywords.some((keyword) => voice.name.toLowerCase().includes(keyword)))
+    .sort((voiceA, voiceB) => {
+      const score = (voice: SpeechSynthesisVoice) => {
+        const name = voice.name.toLowerCase();
+        const naturalVoice = naturalVoiceKeywords.some((keyword) => name.includes(keyword)) ? 5 : 0;
+        return naturalVoice;
+      };
+
+      return score(voiceB) - score(voiceA);
+    })[0];
+}
+
+function makeSpeechFlowNaturally(text: string) {
+  return text
+    .replace(/\bAI\b/gi, "A，I")
+    .replace(/\s+/g, " ")
+    .replace(/([。！？；])(?=\S)/g, "$1 ")
+    .trim();
 }
 
 function fileToDataUrl(file: File) {
@@ -377,16 +422,20 @@ export function CareCompanion() {
       setIsReading(false);
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(makeSpeechFlowNaturally(text));
     utterance.lang = "zh-TW";
-    utterance.rate = 0.82;
+    utterance.voice = chooseTaiwaneseFemaleVoice(window.speechSynthesis.getVoices()) ?? null;
+    utterance.rate = 0.96;
+    utterance.pitch = 1;
+    utterance.volume = 1;
     utterance.onend = () => setIsReading(false);
+    utterance.onerror = () => setIsReading(false);
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
     setIsReading(true);
   };
 
-  const speakIntro = () => speak(`${t.titleA}${t.titleB} ${t.intro} ${t.safety}`);
+  const speakIntro = () => speak(`${t.titleA}${t.titleB} ${t.intro}`);
 
   const chooseFiles = (kind: DocumentKind) => {
     setActiveKind(kind);
@@ -530,7 +579,9 @@ export function CareCompanion() {
     );
   }
 
-  if (!authSession) {
+  const isLocalDemo = !authConfigured && process.env.NODE_ENV !== "production";
+
+  if (!authSession && !isLocalDemo) {
     return (
       <main className="auth-shell">
         <section className="auth-card" aria-labelledby="login-title">
@@ -555,7 +606,7 @@ export function CareCompanion() {
     );
   }
 
-  const viewerName = authSession.user.email || "已登入";
+  const viewerName = authSession?.user.email || "本機預覽";
 
   return (
     <main className="site-shell" data-text-size={largeText ? "large" : "normal"}>
@@ -598,7 +649,6 @@ export function CareCompanion() {
             <a className="primary-button" href="#prepare">{t.start}<span aria-hidden="true">→</span></a>
             <button className="listen-button" type="button" onClick={speakIntro}><span className="sound-bars" aria-hidden="true"><i /><i /><i /></span>{isReading ? t.stopRead : t.listen}</button>
           </div>
-          <p className="safety-note"><span aria-hidden="true">✓</span>{t.safety}</p>
         </div>
 
         <div className="hero-visual" aria-label="安心陪診整理結果示意">
@@ -692,7 +742,6 @@ export function CareCompanion() {
           {isAnalyzing ? t.analyzing : t.analyze}
           <span aria-hidden="true">→</span>
         </button>
-        <p className="privacy-line"><span>鎖</span> 醫療資料以安全連線處理，不會公開分享</p>
       </section>
 
       <section className={`result-section ${hasAnalyzed ? "is-ready" : ""}`} id="result" ref={resultRef}>
@@ -706,7 +755,7 @@ export function CareCompanion() {
             <div className="visit-summary">
               <div className="summary-icon">摘</div>
               <div><span>看診摘要</span><p>{summary}</p></div>
-              <button type="button" onClick={() => speak(`${summary} ${tasks.map((task) => task.title).join("。")}`)}>{isReading ? "■" : "▶"}<span>{isReading ? t.stopRead : t.read}</span></button>
+              <button type="button" onClick={() => speak(summary)}>{isReading ? "■" : "▶"}<span>{isReading ? t.stopRead : t.read}</span></button>
             </div>
             <div className="medication-banner"><span>藥</span><div><strong>用藥提醒</strong><p>{medicationNote}</p></div></div>
             <div className="task-header"><strong>後續待辦</strong><span>{completedCount} / {tasks.length} 已完成</span></div>
