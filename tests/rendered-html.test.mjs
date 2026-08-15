@@ -20,7 +20,7 @@ test("server-renders the care companion product", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /安心陪診 AI/);
+  assert.match(html, /安心陪診2/);
   assert.match(html, /正在確認登入狀態/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/);
 });

@@ -1,4 +1,4 @@
--- 安心陪診：匿名使用者只可讀寫自己的看診整理紀錄與文件。
+-- 安心陪診2：匿名使用者只可讀寫自己的看診整理紀錄與文件。
 
 create extension if not exists pgcrypto;
 
