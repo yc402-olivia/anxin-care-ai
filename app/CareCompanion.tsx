@@ -178,7 +178,7 @@ const copy = {
     loginSending: "正在寄送登入連結…",
     loginFailedPrefix: "無法寄送",
     loginSent: "登入連結已寄出，請到 Gmail 信箱點擊後回到這個頁面。",
-    previewSummary: "完成看診中的錄音後，醫病溝通重點會整理在這裡。照片辨識內容則會放入後續待辦。",
+    previewSummary: "完成看診中的錄音後，醫病溝通重點會整理在這裡。",
     previewMedication: "依藥袋標示的次數與時間服用，不自行增減藥量。",
     previewTasks: [
       { id: "medication", title: "按藥袋指示服藥", detail: "早晚飯後服用；若有不適，依醫療院所指示聯繫", type: "medication" },
@@ -311,7 +311,7 @@ const copy = {
     loginSending: "咧寄登入連結…",
     loginFailedPrefix: "寄袂出去",
     loginSent: "登入連結寄出去矣，請去 Gmail 信箱撳連結了後轉來這个頁面。",
-    previewSummary: "看醫生當中的錄音完成了後，醫病溝通重點會整理佇遮。相片辨識的內容會囥入後續代誌。",
+    previewSummary: "看醫生當中的錄音完成了後，醫病溝通重點會整理佇遮。",
     previewMedication: "照藥袋頂懸寫的次數佮時間食藥，毋通家己加減藥量。",
     previewTasks: [
       { id: "medication", title: "照藥袋指示食藥", detail: "早暗食飽後服用；若感覺無爽快，請照醫療院所指示聯絡", type: "medication" },
@@ -444,7 +444,7 @@ const copy = {
     loginSending: "寄等登入連結…",
     loginFailedPrefix: "寄毋出",
     loginSent: "登入連結寄出哩，請去 Gmail 信箱撳連結過後轉來這隻頁面。",
-    previewSummary: "看症當中个錄音完成過後，醫病溝通重點會整理在這。相片辨識个內容會放入後續事項。",
+    previewSummary: "看症當中个錄音完成過後，醫病溝通重點會整理在這。",
     previewMedication: "照藥袋頂項標个擺數同時間食藥，毋好自家加減藥量。",
     previewTasks: [
       { id: "medication", title: "照藥袋指示食藥", detail: "朝晨暗晡食飽後服用；若係毋鬆爽，請照醫療院所指示聯絡", type: "medication" },

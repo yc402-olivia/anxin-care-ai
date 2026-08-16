@@ -65,7 +65,7 @@ test("turns uploaded care documents into structured follow-up tasks", async () =
   assert.match(client, /className="task-empty"/);
   assert.equal(client.match(/setSummary\(result\.summary\)/g)?.length, 1);
   assert.match(client, /persistVisit\(result, true, false\)/);
-  assert.match(client, /照片辨識內容則會放入後續待辦/);
+  assert.doesNotMatch(client, /照片辨識內容則會放入後續待辦/);
   assert.doesNotMatch(client, /className="medication-banner"/);
   assert.match(server, /照片內容不得作為看診摘要/);
 });
