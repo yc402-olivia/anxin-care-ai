@@ -198,11 +198,11 @@ h1 em { font-style: normal; color: var(--green); white-space: nowrap; }
 .mini-actions span:last-child { color: white; background: var(--green); padding: 8px 11px; border-radius: 8px; }
 
 .step-ribbon {
-  max-width: 860px;
+  max-width: 1120px;
   margin: 0 auto;
   min-height: 112px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   align-items: center;
   background: var(--cream);
 }
@@ -235,6 +235,8 @@ h1 em { font-style: normal; color: var(--green); white-space: nowrap; }
 .question-item:first-of-type { border-top: 0; }.question-item > span { width: 28px; height: 28px; border-radius: 50%; background: var(--green-soft); color: var(--green); display: grid; place-items: center; font-size: .7em; font-weight: 900; }.question-item p { margin: 0; line-height: 1.45; font-size: .84em; font-weight: 700; }.question-item button { border: 0; background: transparent; color: #8c9894; cursor: pointer; font-size: 1.25em; }
 .suggestion-row { margin: 18px auto 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }.suggestion-row > span { color: var(--muted); font-size: .72em; font-weight: 900; margin-right: 4px; }.suggestion-row button { border: 1px solid var(--line); background: white; color: #536963; border-radius: 18px; padding: 8px 11px; font-size: .72em; cursor: pointer; }.suggestion-row button:hover { border-color: var(--green); color: var(--green); }
 
+.visit-section { background: var(--paper); border-top: 1px solid var(--line); }
+.visit-section .recording-card { margin-bottom: 0; }
 .documents-section { background: var(--cream); border-top: 1px solid var(--line); color: var(--ink); }
 .light-heading h2 { color: var(--ink); }.light-heading > span { color: var(--muted); }.light-heading > p { color: var(--orange); }
 .recording-card { margin: 0 0 18px; padding: 18px 20px; border: 1px solid #f0d5c3; border-radius: 15px; background: var(--orange-soft); display: flex; align-items: center; justify-content: space-between; gap: 18px; }
@@ -280,7 +282,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, textarea:focus-visi
   .hero { min-height: 0; grid-template-columns: 1fr; padding: 54px 20px; gap: 38px; }
   h1 { font-size: clamp(2.55rem, 11vw, 3.7rem); }.hero-intro { font-size: .96em; }.primary-button, .listen-button { width: 100%; }
   .hero-visual { max-width: 500px; width: 100%; margin: 0 auto; }
-  .step-ribbon { min-height: 96px; padding: 12px 14px; overflow-x: auto; grid-template-columns: repeat(3, minmax(190px, 1fr)); }.step-ribbon div + div::before { display: none; }
+  .step-ribbon { min-height: 96px; padding: 12px 14px; overflow-x: auto; grid-template-columns: repeat(4, minmax(190px, 1fr)); }.step-ribbon div + div::before { display: none; }
   .workflow-section, .result-section { padding: 64px 18px; }.section-heading { margin-bottom: 28px; }.question-workspace { grid-template-columns: 1fr; }.suggestion-row > span { width: 100%; }
   .document-grid { grid-template-columns: 1fr; }.document-card { min-height: 91px; }.analyze-button { min-width: 0; width: 100%; }
   .recording-card { align-items: stretch; flex-direction: column; }.recording-actions { justify-content: space-between; }.recording-button { flex: 1; }

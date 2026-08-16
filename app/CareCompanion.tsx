@@ -63,6 +63,7 @@ const copy = {
     signOut: "登出",
     localPreview: "本機預覽",
     navPrepare: "看診前",
+    navVisit: "看診中",
     navDocuments: "看診資料",
     navTasks: "後續待辦",
     eyebrow: "陪你記得每一件重要的事",
@@ -71,7 +72,7 @@ const copy = {
     intro: "把問題、藥袋和預約單放進來，人工智能會整理成家人都看得懂的重點與待辦。",
     start: "開始整理這次看診",
     listen: "聽功能介紹",
-    steps: ["先記下問題", "拍下看診資料", "帶走清楚待辦"],
+    steps: ["先記下問題", "拍下看診資料", "紀錄醫病溝通", "帶走清楚待辦"],
     prepareKicker: "看診前",
     prepareTitle: "這次想問醫生什麼？",
     prepareIntro: "想到什麼就先記下來，也可以按麥克風直接說。",
@@ -80,6 +81,9 @@ const copy = {
     listening: "正在聽…",
     add: "加入問題",
     suggestions: ["這個藥要吃多久？", "什麼情況要提早回診？", "飲食或活動要注意什麼？"],
+    visitKicker: "看診中",
+    visitTitle: "完整記下醫師的重要交代",
+    visitIntro: "取得現場同意後開始錄音，結束時會自動整理成看診摘要與後續待辦。",
     documentsKicker: "看診後",
     documentsTitle: "把資料拍清楚，交給 AI 整理",
     documentsIntro: "可拍藥袋、預約單或衛教單。照片只用於本次整理。",
@@ -192,6 +196,7 @@ const copy = {
     signOut: "登出",
     localPreview: "本機預覽",
     navPrepare: "看醫生進前",
+    navVisit: "看醫生當中",
     navDocuments: "看病資料",
     navTasks: "後續代誌",
     eyebrow: "陪你記牢每一項重要的代誌",
@@ -200,7 +205,7 @@ const copy = {
     intro: "共問題、藥袋佮預約單囥入來，AI 會整理做厝裡人攏看會明的重點佮代誌。",
     start: "開始整理這擺看病",
     listen: "聽功能按怎用",
-    steps: ["先記問題", "翕看病資料", "帶清楚代誌轉去"],
+    steps: ["先記問題", "翕看病資料", "記錄醫病溝通", "帶清楚代誌轉去"],
     prepareKicker: "看醫生進前",
     prepareTitle: "這擺欲問醫生啥物？",
     prepareIntro: "想著就先記落來，也會使撳麥克風直接講。",
@@ -209,6 +214,9 @@ const copy = {
     listening: "咧聽…",
     add: "加問題",
     suggestions: ["這个藥愛食偌久？", "啥物情形愛較早轉去予醫生看？", "食物抑是活動愛注意啥物？"],
+    visitKicker: "看醫生當中",
+    visitTitle: "共醫生重要的交代記予完整",
+    visitIntro: "得著現場同意了後開始錄音，結束會自動整理做看病摘要佮後續代誌。",
     documentsKicker: "看醫生了後",
     documentsTitle: "共資料翕予清楚，交予 AI 整理",
     documentsIntro: "會使翕藥袋、預約單抑是衛教單。相片干焦用佇這擺整理。",
@@ -321,6 +329,7 @@ const copy = {
     signOut: "登出",
     localPreview: "本機預覽",
     navPrepare: "看症前",
+    navVisit: "看症當中",
     navDocuments: "看症資料",
     navTasks: "過後愛做",
     eyebrow: "陪你記得逐項重要个事情",
@@ -329,7 +338,7 @@ const copy = {
     intro: "摎問題、藥袋同預約單放入來，AI 會整理做屋下人全看得識个重點同愛做个事。",
     start: "開始整理這擺看症",
     listen: "聽功能仰般用",
-    steps: ["先寫問題", "影看症資料", "帶等清楚事項轉屋"],
+    steps: ["先寫問題", "影看症資料", "記錄醫病溝通", "帶等清楚事項轉屋"],
     prepareKicker: "看症前",
     prepareTitle: "這擺愛問醫生麼个？",
     prepareIntro: "想著就先寫下來，也做得撳麥克風直接講。",
@@ -338,6 +347,9 @@ const copy = {
     listening: "聽等…",
     add: "加問題",
     suggestions: ["這藥愛食幾久？", "麼个情形愛較遽轉診？", "食東西抑係活動愛注意麼个？"],
+    visitKicker: "看症當中",
+    visitTitle: "摎醫生重要个交代記完整",
+    visitIntro: "得著現場同意過後開始錄音，結束會自動整理做看症摘要摎後續事項。",
     documentsKicker: "看症後",
     documentsTitle: "資料影清楚，交分 AI 整理",
     documentsIntro: "做得影藥袋、預約單抑係衛教單。相片淨係用來整理這擺个資料。",
@@ -983,6 +995,7 @@ export function CareCompanion() {
         </a>
         <nav aria-label={t.mainNavLabel}>
           <a href="#prepare">{t.navPrepare}</a>
+          <a href="#visit">{t.navVisit}</a>
           <a href="#documents">{t.navDocuments}</a>
           <a href="#result">{t.navTasks}</a>
         </nav>
@@ -1037,7 +1050,7 @@ export function CareCompanion() {
       </section>
 
       <section className="step-ribbon" aria-label={t.stepsLabel}>
-        {t.steps.map((step, index) => <div key={step}><span>{pad(index + 1)}</span><strong>{step}</strong>{index < 2 && <i aria-hidden="true">→</i>}</div>)}
+        {t.steps.map((step, index) => <div key={step}><span>{pad(index + 1)}</span><strong>{step}</strong>{index < t.steps.length - 1 && <i aria-hidden="true">→</i>}</div>)}
       </section>
 
       <section className="workflow-section prepare-section" id="prepare">
@@ -1070,11 +1083,11 @@ export function CareCompanion() {
         </div>
       </section>
 
-      <section className="workflow-section documents-section" id="documents">
-        <div className="section-heading light-heading">
-          <p>{t.documentsKicker}</p>
-          <h2>{t.documentsTitle}</h2>
-          <span>{t.documentsIntro}</span>
+      <section className="workflow-section visit-section" id="visit">
+        <div className="section-heading">
+          <p>{t.visitKicker}</p>
+          <h2>{t.visitTitle}</h2>
+          <span>{t.visitIntro}</span>
         </div>
         <div className={`recording-card ${recordingState === "recording" ? "is-recording" : ""}`}>
           <div className="recording-copy">
@@ -1092,6 +1105,14 @@ export function CareCompanion() {
               {recordingState === "recording" ? t.stopRecording : recordingState === "processing" ? t.processingRecording : t.startRecording}
             </button>
           </div>
+        </div>
+      </section>
+
+      <section className="workflow-section documents-section" id="documents">
+        <div className="section-heading light-heading">
+          <p>{t.documentsKicker}</p>
+          <h2>{t.documentsTitle}</h2>
+          <span>{t.documentsIntro}</span>
         </div>
         <input ref={fileInputRef} className="visually-hidden" type="file" accept="image/*" capture="environment" multiple onChange={(event) => addFiles(event.target.files)} />
         <div className="document-grid">

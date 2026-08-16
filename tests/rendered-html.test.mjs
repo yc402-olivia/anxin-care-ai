@@ -80,6 +80,10 @@ test("records visits ephemerally and never persists audio or transcripts", async
   assert.match(client, /setSummary\(result\.summary\)/);
   assert.match(client, /整理完成後會放入看診摘要與後續待辦/);
   assert.match(styles, /\.recording-button[^}]+background: var\(--orange\)/s);
+  assert.match(client, /steps: \["先記下問題", "拍下看診資料", "紀錄醫病溝通", "帶走清楚待辦"\]/);
+  assert.match(client, /<section className="workflow-section visit-section" id="visit">/);
+  assert.match(client, /<p>\{t\.visitKicker\}<\/p>/);
+  assert.match(styles, /grid-template-columns: repeat\(4, 1fr\)/);
   assert.match(audioServer, /\/v1\/audio\/transcriptions/);
   assert.match(audioServer, /store: false/);
   assert.match(audioServer, /authenticateRequest\(request\)/);
