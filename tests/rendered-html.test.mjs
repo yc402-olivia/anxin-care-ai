@@ -26,6 +26,12 @@ test("server-renders the care companion product", async () => {
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/);
 });
 
+test("uses the current brand in the static Netlify page title", async () => {
+  const staticPage = await readFile(new URL("../index.html", import.meta.url), "utf8");
+  assert.match(staticPage, /<title>安心陪診｜/);
+  assert.doesNotMatch(staticPage, /安心陪診2/);
+});
+
 test("keeps private keys out of browser configuration", async () => {
   const [config, environment, netlify] = await Promise.all([
     readFile(new URL("../server/config.ts", import.meta.url), "utf8"),
