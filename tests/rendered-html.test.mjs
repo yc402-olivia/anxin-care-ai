@@ -20,7 +20,8 @@ test("server-renders the care companion product", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /安心陪診2/);
+  assert.match(html, /安心陪診/);
+  assert.doesNotMatch(html, /安心陪診2/);
   assert.match(html, /正在確認登入狀態/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/);
 });
@@ -94,6 +95,8 @@ test("omits the trial-mode storage notice", async () => {
 
   assert.doesNotMatch(client, /試用模式|安全保存|storage-status/);
   assert.doesNotMatch(styles, /storage-status/);
+  assert.match(styles, /\.brand > span:last-child \{ color: var\(--green\); \}/);
+  assert.match(styles, /\.auth-brand strong \{ color: var\(--green\); \}/);
 });
 
 test("switches the complete preview and AI output language together", async () => {
