@@ -60,9 +60,14 @@ test("turns uploaded care documents into structured follow-up tasks", async () =
   assert.match(server, /detail: "high"/);
   assert.match(server, /顯示在『後續待辦』下方/);
   assert.doesNotMatch(server, /demoResult/);
-  assert.match(client, /setTasks\(result\.tasks/);
+  assert.match(client, /const additions = result\.tasks\.map/);
   assert.doesNotMatch(client, /setTasks\(initialTasks\)/);
   assert.match(client, /className="task-empty"/);
+  assert.equal(client.match(/setSummary\(result\.summary\)/g)?.length, 1);
+  assert.match(client, /persistVisit\(result, true, false\)/);
+  assert.match(client, /照片辨識內容則會放入後續待辦/);
+  assert.doesNotMatch(client, /className="medication-banner"/);
+  assert.match(server, /照片內容不得作為看診摘要/);
 });
 
 test("records visits ephemerally and never persists audio or transcripts", async () => {

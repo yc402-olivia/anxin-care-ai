@@ -178,7 +178,7 @@ const copy = {
     loginSending: "正在寄送登入連結…",
     loginFailedPrefix: "無法寄送",
     loginSent: "登入連結已寄出，請到 Gmail 信箱點擊後回到這個頁面。",
-    previewSummary: "醫師交代按藥袋服藥，並在回診前完成抽血檢查。若出現不舒服，請依院所說明聯絡醫療人員。",
+    previewSummary: "完成看診中的錄音後，醫病溝通重點會整理在這裡。照片辨識內容則會放入後續待辦。",
     previewMedication: "依藥袋標示的次數與時間服用，不自行增減藥量。",
     previewTasks: [
       { id: "medication", title: "按藥袋指示服藥", detail: "早晚飯後服用；若有不適，依醫療院所指示聯繫", type: "medication" },
@@ -311,7 +311,7 @@ const copy = {
     loginSending: "咧寄登入連結…",
     loginFailedPrefix: "寄袂出去",
     loginSent: "登入連結寄出去矣，請去 Gmail 信箱撳連結了後轉來這个頁面。",
-    previewSummary: "醫生交代愛照藥袋食藥，閣愛佇轉去看醫生進前完成抽血檢查。若感覺無爽快，請照醫療院所的說明聯絡相關人員。",
+    previewSummary: "看醫生當中的錄音完成了後，醫病溝通重點會整理佇遮。相片辨識的內容會囥入後續代誌。",
     previewMedication: "照藥袋頂懸寫的次數佮時間食藥，毋通家己加減藥量。",
     previewTasks: [
       { id: "medication", title: "照藥袋指示食藥", detail: "早暗食飽後服用；若感覺無爽快，請照醫療院所指示聯絡", type: "medication" },
@@ -444,7 +444,7 @@ const copy = {
     loginSending: "寄等登入連結…",
     loginFailedPrefix: "寄毋出",
     loginSent: "登入連結寄出哩，請去 Gmail 信箱撳連結過後轉來這隻頁面。",
-    previewSummary: "醫生交代愛照藥袋食藥，還愛在轉去看症以前完成抽血檢查。若係有哪位毋鬆爽，請照醫療院所个說明聯絡醫療人員。",
+    previewSummary: "看症當中个錄音完成過後，醫病溝通重點會整理在這。相片辨識个內容會放入後續事項。",
     previewMedication: "照藥袋頂項標个擺數同時間食藥，毋好自家加減藥量。",
     previewTasks: [
       { id: "medication", title: "照藥袋指示食藥", detail: "朝晨暗晡食飽後服用；若係毋鬆爽，請照醫療院所指示聯絡", type: "medication" },
@@ -554,7 +554,6 @@ export function CareCompanion() {
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const [tasks, setTasks] = useState<CareTask[]>(() => createPreviewTasks("zh"));
   const [summary, setSummary] = useState(copy.zh.previewSummary);
-  const [medicationNote, setMedicationNote] = useState(copy.zh.previewMedication);
   const [notice, setNotice] = useState("");
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
   const [authSession, setAuthSession] = useState<Session | null>(null);
@@ -651,7 +650,6 @@ export function CareCompanion() {
     setQuestion("");
     setQuestions([...copy[nextLocale].initialQuestions]);
     setSummary(copy[nextLocale].previewSummary);
-    setMedicationNote(copy[nextLocale].previewMedication);
     setTasks(createPreviewTasks(nextLocale));
     setHasAnalyzed(false);
     setNotice("");
@@ -727,7 +725,7 @@ export function CareCompanion() {
     setDocuments((current) => [...current, ...additions]);
   };
 
-  const persistVisit = async (result: AnalysisResult, includeDocuments = true) => {
+  const persistVisit = async (result: AnalysisResult, includeDocuments = true, includeSummary = true) => {
     if (!supabase) return;
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
@@ -736,8 +734,8 @@ export function CareCompanion() {
       .insert({
         user_id: userData.user.id,
         questions,
-        summary: result.summary,
-        medication_note: result.medicationNote,
+        summary: includeSummary ? result.summary : "",
+        medication_note: includeSummary ? result.medicationNote : "",
         tasks: result.tasks,
       })
       .select("id")
@@ -798,8 +796,13 @@ export function CareCompanion() {
       const result = responseBody as AnalysisResult;
       if (!result.summary || !Array.isArray(result.tasks)) throw new Error(t.invalidAnalysis);
       setSummary(result.summary);
-      setMedicationNote(result.medicationNote);
-      setTasks(result.tasks.map((task) => ({ ...task, done: false })));
+      setTasks((current) => {
+        const additions = result.tasks.map((task) => ({ ...task, done: false }));
+        const existing = hasAnalyzed ? current : [];
+        return [...existing, ...additions].filter((task, index, all) =>
+          all.findIndex((item) => item.title === task.title && item.detail === task.detail) === index,
+        );
+      });
       setHasAnalyzed(true);
       await persistVisit(result, false);
       setNotice(result.warnings.filter(Boolean).join(" "));
@@ -895,11 +898,15 @@ export function CareCompanion() {
       if (!result.summary || !Array.isArray(result.tasks) || !Array.isArray(result.warnings)) {
         throw new Error(t.invalidAnalysis);
       }
-      setSummary(result.summary);
-      setMedicationNote(result.medicationNote);
-      setTasks(result.tasks.map((task) => ({ ...task, done: false })));
+      setTasks((current) => {
+        const additions = result.tasks.map((task) => ({ ...task, done: false }));
+        const existing = hasAnalyzed ? current : [];
+        return [...existing, ...additions].filter((task, index, all) =>
+          all.findIndex((item) => item.title === task.title && item.detail === task.detail) === index,
+        );
+      });
       setHasAnalyzed(true);
-      await persistVisit(result);
+      await persistVisit(result, true, false);
       setNotice(result.warnings.filter(Boolean).join(" "));
       window.setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
     } catch (error) {
@@ -1160,7 +1167,6 @@ export function CareCompanion() {
               <div><span>{t.summaryLabel}</span><p>{summary}</p></div>
               <button type="button" onClick={() => speak(summary)}>{isReading ? "■" : "▶"}<span>{isReading ? t.stopRead : t.read}</span></button>
             </div>
-            <div className="medication-banner"><span>{t.medicationMark}</span><div><strong>{t.medicationLabel}</strong><p>{medicationNote}</p></div></div>
             <div className="task-header"><strong>{t.tasksLabel}</strong><span>{completedCount} / {tasks.length} {t.completedLabel}</span></div>
             <div className="task-list">
               {tasks.length === 0 ? <div className="task-empty">{t.noTasks}</div> : tasks.map((task, index) => (

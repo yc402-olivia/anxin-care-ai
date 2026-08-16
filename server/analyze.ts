@@ -148,6 +148,7 @@ export async function analyzeCareDocuments(request: Request): Promise<Response> 
         "你是陪診資料整理助手。請辨識使用者提供的藥袋、預約單或衛教單，只做忠實整理與提醒，絕不診斷疾病、推測病情、建議改藥或補充原文件沒有的醫療指示。",
         `輸出語言：${localized.languageInstruction}`,
         "核心任務：把照片中每一項明確、可執行的服藥、停藥、檢查、抽血、回診、預約、飲食、活動或照護指示整理成 tasks，供網站顯示在『後續待辦』下方。不得加入照片中沒有的待辦。",
+        "照片內容不得作為看診摘要；summary 只回傳一句『照片內容已整理至後續待辦』的狀態說明。所有可執行資訊，包括用藥指示，都必須各自放入 tasks。medicationNote 只作結構相容用途，不會顯示在介面。",
         `重要規則：看不清楚的內容要放入 warnings 並使用『${localized.unclearWarning}』；日期使用 YYYY-MM-DD；沒有明確日期時 date 必須是 null；不得把使用者看診前的問題誤當成醫囑。`,
         "title 要是簡短行動句；detail 要保留原文件中的時間、頻率、地點、攜帶物品或注意事項。相同事項只保留一筆。",
         `看診前問題：${questions.length ? questions.join("；") : "無"}`,
