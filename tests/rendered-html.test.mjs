@@ -65,16 +65,20 @@ test("turns uploaded care documents into structured follow-up tasks", async () =
 });
 
 test("records visits ephemerally and never persists audio or transcripts", async () => {
-  const [client, audioServer, netlify] = await Promise.all([
+  const [client, audioServer, netlify, styles] = await Promise.all([
     readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8"),
     readFile(new URL("../server/audio.ts", import.meta.url), "utf8"),
     readFile(new URL("../netlify.toml", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
   assert.match(client, /navigator\.mediaDevices\.getUserMedia/);
   assert.match(client, /new MediaRecorder/);
   assert.match(client, /window\.confirm\(t\.recordingConsent\)/);
   assert.match(client, /fetch\("\/api\/analyze-audio"/);
+  assert.match(client, /setSummary\(result\.summary\)/);
+  assert.match(client, /整理完成後會放入看診摘要與後續待辦/);
+  assert.match(styles, /\.recording-button[^}]+background: var\(--orange\)/s);
   assert.match(audioServer, /\/v1\/audio\/transcriptions/);
   assert.match(audioServer, /store: false/);
   assert.match(audioServer, /authenticateRequest\(request\)/);
