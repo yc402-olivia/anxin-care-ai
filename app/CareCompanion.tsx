@@ -480,13 +480,24 @@ function escapeIcs(value: string) {
   return value.replace(/\\/g, "\\\\").replace(/,/g, "\\,").replace(/;/g, "\\;").replace(/\n/g, "\\n");
 }
 
-function chooseTaiwaneseFemaleVoice(voices: SpeechSynthesisVoice[]) {
+function chooseTaiwaneseMaleVoice(voices: SpeechSynthesisVoice[]) {
   const naturalVoiceKeywords = [
     "natural",
     "enhanced",
     "premium",
     "siri",
     "google",
+  ];
+  const maleVoiceKeywords = [
+    "yunjhe",
+    "yun-jhe",
+    "yun jhe",
+    "li-mu",
+    "li mu",
+    "male",
+    "雲哲",
+    "李牧",
+    "男聲",
   ];
   const femaleVoiceKeywords = [
     "hsiaochen",
@@ -508,12 +519,14 @@ function chooseTaiwaneseFemaleVoice(voices: SpeechSynthesisVoice[]) {
 
   return voices
     .filter((voice) => voice.lang.toLowerCase().replace("_", "-") === "zh-tw")
-    .filter((voice) => femaleVoiceKeywords.some((keyword) => voice.name.toLowerCase().includes(keyword)))
     .sort((voiceA, voiceB) => {
       const score = (voice: SpeechSynthesisVoice) => {
         const name = voice.name.toLowerCase();
-        const naturalVoice = naturalVoiceKeywords.some((keyword) => name.includes(keyword)) ? 5 : 0;
-        return naturalVoice;
+        const maleVoice = maleVoiceKeywords.some((keyword) => name.includes(keyword)) ? 20 : 0;
+        const femaleVoice = femaleVoiceKeywords.some((keyword) => name.includes(keyword)) ? -20 : 0;
+        const naturalVoice = naturalVoiceKeywords.some((keyword) => name.includes(keyword)) ? 8 : 0;
+        const localVoice = voice.localService ? 2 : 0;
+        return maleVoice + femaleVoice + naturalVoice + localVoice;
       };
 
       return score(voiceB) - score(voiceA);
@@ -698,9 +711,9 @@ export function CareCompanion() {
     }
     const utterance = new SpeechSynthesisUtterance(makeSpeechFlowNaturally(text));
     utterance.lang = "zh-TW";
-    utterance.voice = chooseTaiwaneseFemaleVoice(window.speechSynthesis.getVoices()) ?? null;
-    utterance.rate = 0.96;
-    utterance.pitch = 1;
+    utterance.voice = chooseTaiwaneseMaleVoice(window.speechSynthesis.getVoices()) ?? null;
+    utterance.rate = 0.92;
+    utterance.pitch = 0.86;
     utterance.volume = 1;
     utterance.onend = () => setIsReading(false);
     utterance.onerror = () => setIsReading(false);

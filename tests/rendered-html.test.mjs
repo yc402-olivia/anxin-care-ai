@@ -133,3 +133,13 @@ test("switches the complete preview and AI output language together", async () =
   const renderedInterface = client.slice(client.indexOf("const viewerName"));
   assert.doesNotMatch(renderedInterface, />重點整理好了<|>這次醫生交代<|>問題清單<|>看診摘要<|>用藥提醒<|>後續待辦</);
 });
+
+test("prefers a natural Taiwanese Mandarin male reading voice", async () => {
+  const client = await readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8");
+  assert.match(client, /chooseTaiwaneseMaleVoice/);
+  assert.match(client, /"yunjhe"/);
+  assert.match(client, /voice\.lang\.toLowerCase\(\).*=== "zh-tw"/);
+  assert.match(client, /utterance\.rate = 0\.92/);
+  assert.match(client, /utterance\.pitch = 0\.86/);
+  assert.doesNotMatch(client, /chooseTaiwaneseFemaleVoice/);
+});
