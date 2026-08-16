@@ -64,6 +64,24 @@ test("turns uploaded care documents into structured follow-up tasks", async () =
   assert.match(client, /className="task-empty"/);
 });
 
+test("records visits ephemerally and never persists audio or transcripts", async () => {
+  const [client, audioServer, netlify] = await Promise.all([
+    readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../server/audio.ts", import.meta.url), "utf8"),
+    readFile(new URL("../netlify.toml", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(client, /navigator\.mediaDevices\.getUserMedia/);
+  assert.match(client, /new MediaRecorder/);
+  assert.match(client, /window\.confirm\(t\.recordingConsent\)/);
+  assert.match(client, /fetch\("\/api\/analyze-audio"/);
+  assert.match(audioServer, /\/v1\/audio\/transcriptions/);
+  assert.match(audioServer, /store: false/);
+  assert.match(audioServer, /authenticateRequest\(request\)/);
+  assert.doesNotMatch(audioServer, /supabase|\.upload\(|writeFile|createWriteStream/);
+  assert.match(netlify, /from = "\/api\/analyze-audio"/);
+});
+
 test("omits the trial-mode storage notice", async () => {
   const [client, styles] = await Promise.all([
     readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8"),

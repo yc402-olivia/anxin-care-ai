@@ -4,11 +4,11 @@ import { authenticateRequest } from "./auth.ts";
 type DocumentInput = { kind?: unknown; name?: unknown; dataUrl?: unknown };
 
 type CareTaskType = "medication" | "test" | "visit";
-type Locale = "zh" | "nan" | "hak";
+export type Locale = "zh" | "nan" | "hak";
 
 const taskTypes = new Set<CareTaskType>(["medication", "test", "visit"]);
 
-const responseCopy = {
+export const responseCopy = {
   zh: {
     languageInstruction: "summary、medicationNote、tasks 的 title 與 detail、warnings 全部使用臺灣華語繁體中文，不可混入台語或客語。",
     noDocuments: "請先上傳至少一張看診資料照片。",
@@ -38,7 +38,7 @@ const responseCopy = {
   },
 } as const;
 
-const analysisSchema = {
+export const analysisSchema = {
   type: "object",
   additionalProperties: false,
   required: ["summary", "medicationNote", "tasks", "warnings"],
@@ -64,7 +64,7 @@ const analysisSchema = {
   },
 } as const;
 
-function extractOutputText(payload: Record<string, unknown>) {
+export function extractOutputText(payload: Record<string, unknown>) {
   if (typeof payload.output_text === "string") return payload.output_text;
   const output = Array.isArray(payload.output) ? payload.output : [];
   for (const item of output) {
@@ -83,7 +83,7 @@ function cleanText(value: unknown, maxLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
-function normalizeAnalysisResult(value: unknown) {
+export function normalizeAnalysisResult(value: unknown) {
   if (!value || typeof value !== "object") return null;
   const result = value as Record<string, unknown>;
   const summary = cleanText(result.summary, 1200);

@@ -83,6 +83,16 @@ const copy = {
     documentsKicker: "看診後",
     documentsTitle: "把資料拍清楚，交給 AI 整理",
     documentsIntro: "可拍藥袋、預約單或衛教單。照片只用於本次整理。",
+    recordingTitle: "錄下醫病溝通，整理醫師叮嚀",
+    recordingIntro: "錄音會在瀏覽器記憶體中暫時處理，完成整理後立即釋放，不會保存錄音檔。",
+    recordingConsent: "開始前，請先取得醫師與現場所有人的同意。確定已取得同意並開始錄音嗎？",
+    startRecording: "開始錄音",
+    stopRecording: "停止並整理",
+    processingRecording: "正在整理醫師交代…",
+    recordingFailed: "目前無法整理錄音，請稍後再試。",
+    microphoneUnavailable: "這個瀏覽器暫不支援錄音功能。",
+    microphoneDenied: "無法使用麥克風，請允許麥克風權限後再試。",
+    recordingLimit: "錄音已達 30 分鐘，將自動停止並開始整理。",
     takePhoto: "拍照或選照片",
     uploaded: "已加入",
     analyze: "請 AI 幫我整理",
@@ -202,6 +212,16 @@ const copy = {
     documentsKicker: "看醫生了後",
     documentsTitle: "共資料翕予清楚，交予 AI 整理",
     documentsIntro: "會使翕藥袋、預約單抑是衛教單。相片干焦用佇這擺整理。",
+    recordingTitle: "錄落醫生講的話，整理重要交代",
+    recordingIntro: "錄音干焦暫時佇瀏覽器處理，整理好就會放掉，袂保存錄音檔。",
+    recordingConsent: "開始進前，請先得著醫生佮現場逐家同意。敢有確定同意，欲開始錄音？",
+    startRecording: "開始錄音",
+    stopRecording: "停止閣整理",
+    processingRecording: "咧整理醫生交代…",
+    recordingFailed: "這馬無法度整理錄音，請等一下閣試。",
+    microphoneUnavailable: "這个瀏覽器暫時無支援錄音。",
+    microphoneDenied: "無法度使用麥克風，請允准權限了後閣試。",
+    recordingLimit: "錄音已經 30 分鐘，會自動停止閣開始整理。",
     takePhoto: "翕相抑是揀相片",
     uploaded: "加好矣",
     analyze: "請 AI 共我整理",
@@ -321,6 +341,16 @@ const copy = {
     documentsKicker: "看症後",
     documentsTitle: "資料影清楚，交分 AI 整理",
     documentsIntro: "做得影藥袋、預約單抑係衛教單。相片淨係用來整理這擺个資料。",
+    recordingTitle: "錄下醫生講个話，整理重要交代",
+    recordingIntro: "錄音淨係在瀏覽器暫時處理，整理好斯會放忒，毋會保存錄音檔。",
+    recordingConsent: "開始以前，請先得著醫生摎現場逐儕个同意。確定同意愛開始錄音無？",
+    startRecording: "開始錄音",
+    stopRecording: "停止摎整理",
+    processingRecording: "在整理醫生交代…",
+    recordingFailed: "這下無法度整理錄音，請等一下再試。",
+    microphoneUnavailable: "這隻瀏覽器這下無支援錄音。",
+    microphoneDenied: "無法度使用麥克風，請允准權限過後再試。",
+    recordingLimit: "錄音既經 30 分鐘，會自動停止摎開始整理。",
     takePhoto: "影相抑係揀相片",
     uploaded: "加好哩",
     analyze: "請 AI 分𠊎整理",
@@ -507,6 +537,8 @@ export function CareCompanion() {
   const [isListening, setIsListening] = useState(false);
   const [isReading, setIsReading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [recordingState, setRecordingState] = useState<"idle" | "recording" | "processing">("idle");
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const [tasks, setTasks] = useState<CareTask[]>(() => createPreviewTasks("zh"));
   const [summary, setSummary] = useState(copy.zh.previewSummary);
@@ -521,6 +553,10 @@ export function CareCompanion() {
   const [loginSubmitting, setLoginSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const recordingChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<ReturnType<typeof window.setInterval> | null>(null);
   const t = copy[locale];
 
   useEffect(() => {
@@ -566,6 +602,16 @@ export function CareCompanion() {
   useEffect(() => {
     return () => documents.forEach((document) => URL.revokeObjectURL(document.preview));
   }, [documents]);
+
+  useEffect(() => () => {
+    if (recordingTimerRef.current) window.clearInterval(recordingTimerRef.current);
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.onstop = null;
+      mediaRecorderRef.current.stop();
+    }
+    mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+    recordingChunksRef.current = [];
+  }, []);
 
   const completedCount = useMemo(() => tasks.filter((task) => task.done).length, [tasks]);
 
@@ -669,7 +715,7 @@ export function CareCompanion() {
     setDocuments((current) => [...current, ...additions]);
   };
 
-  const persistVisit = async (result: AnalysisResult) => {
+  const persistVisit = async (result: AnalysisResult, includeDocuments = true) => {
     if (!supabase) return;
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
@@ -686,6 +732,7 @@ export function CareCompanion() {
       .single();
     if (error || !visit) return;
 
+    if (!includeDocuments) return;
     await Promise.all(
       documents.map(async (document) => {
         const safeName = document.file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
@@ -705,6 +752,95 @@ export function CareCompanion() {
         }
       }),
     );
+  };
+
+  const finishRecordingResources = () => {
+    if (recordingTimerRef.current) window.clearInterval(recordingTimerRef.current);
+    recordingTimerRef.current = null;
+    mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+    mediaStreamRef.current = null;
+    mediaRecorderRef.current = null;
+  };
+
+  const analyzeRecording = async (audio: Blob) => {
+    if (!authSession?.access_token) {
+      setNotice(t.expiredNotice);
+      setRecordingState("idle");
+      return;
+    }
+    setRecordingState("processing");
+    setNotice("");
+    try {
+      const form = new FormData();
+      const extension = audio.type.includes("mp4") ? "m4a" : audio.type.includes("ogg") ? "ogg" : "webm";
+      form.set("audio", audio, `visit.${extension}`);
+      form.set("locale", locale);
+      form.set("questions", JSON.stringify(questions));
+      const response = await fetch("/api/analyze-audio", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authSession.access_token}` },
+        body: form,
+      });
+      const responseBody = await response.json() as AnalysisResult | AnalysisError;
+      if (!response.ok) throw new Error((responseBody as AnalysisError).error?.message || t.recordingFailed);
+      const result = responseBody as AnalysisResult;
+      if (!result.summary || !Array.isArray(result.tasks)) throw new Error(t.invalidAnalysis);
+      setSummary(result.summary);
+      setMedicationNote(result.medicationNote);
+      setTasks(result.tasks.map((task) => ({ ...task, done: false })));
+      setHasAnalyzed(true);
+      await persistVisit(result, false);
+      setNotice(result.warnings.filter(Boolean).join(" "));
+      window.setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : t.recordingFailed);
+    } finally {
+      setRecordingState("idle");
+      setRecordingSeconds(0);
+    }
+  };
+
+  const startRecording = async () => {
+    if (!("MediaRecorder" in window) || !navigator.mediaDevices?.getUserMedia) {
+      setNotice(t.microphoneUnavailable);
+      return;
+    }
+    if (!window.confirm(t.recordingConsent)) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
+      const preferredType = ["audio/webm;codecs=opus", "audio/mp4", "audio/ogg;codecs=opus"].find((type) => MediaRecorder.isTypeSupported(type));
+      const recorder = new MediaRecorder(stream, { ...(preferredType ? { mimeType: preferredType } : {}), audioBitsPerSecond: 16_000 });
+      mediaStreamRef.current = stream;
+      mediaRecorderRef.current = recorder;
+      recordingChunksRef.current = [];
+      recorder.ondataavailable = (event) => { if (event.data.size > 0) recordingChunksRef.current.push(event.data); };
+      recorder.onstop = () => {
+        const audio = new Blob(recordingChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        recordingChunksRef.current = [];
+        finishRecordingResources();
+        void analyzeRecording(audio);
+      };
+      recorder.start(1_000);
+      setRecordingSeconds(0);
+      setRecordingState("recording");
+      recordingTimerRef.current = window.setInterval(() => {
+        setRecordingSeconds((seconds) => {
+          if (seconds >= 1_799) {
+            setNotice(t.recordingLimit);
+            if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop();
+          }
+          return seconds + 1;
+        });
+      }, 1_000);
+    } catch {
+      finishRecordingResources();
+      setNotice(t.microphoneDenied);
+      setRecordingState("idle");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop();
   };
 
   const analyze = async () => {
@@ -939,6 +1075,23 @@ export function CareCompanion() {
           <p>{t.documentsKicker}</p>
           <h2>{t.documentsTitle}</h2>
           <span>{t.documentsIntro}</span>
+        </div>
+        <div className={`recording-card ${recordingState === "recording" ? "is-recording" : ""}`}>
+          <div className="recording-copy">
+            <span className="recording-dot" aria-hidden="true" />
+            <div><strong>{t.recordingTitle}</strong><p>{t.recordingIntro}</p></div>
+          </div>
+          <div className="recording-actions">
+            {recordingState === "recording" && <time>{`${String(Math.floor(recordingSeconds / 60)).padStart(2, "0")}:${String(recordingSeconds % 60).padStart(2, "0")}`}</time>}
+            <button
+              type="button"
+              className="recording-button"
+              disabled={recordingState === "processing"}
+              onClick={recordingState === "recording" ? stopRecording : startRecording}
+            >
+              {recordingState === "recording" ? t.stopRecording : recordingState === "processing" ? t.processingRecording : t.startRecording}
+            </button>
+          </div>
         </div>
         <input ref={fileInputRef} className="visually-hidden" type="file" accept="image/*" capture="environment" multiple onChange={(event) => addFiles(event.target.files)} />
         <div className="document-grid">

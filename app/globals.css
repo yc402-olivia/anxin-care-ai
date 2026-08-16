@@ -237,6 +237,11 @@ h1 em { font-style: normal; color: var(--green); white-space: nowrap; }
 
 .documents-section { background: var(--cream); border-top: 1px solid var(--line); color: var(--ink); }
 .light-heading h2 { color: var(--ink); }.light-heading > span { color: var(--muted); }.light-heading > p { color: var(--orange); }
+.recording-card { margin: 0 0 18px; padding: 18px 20px; border: 1px solid #efc8c8; border-radius: 15px; background: #fffafa; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.recording-copy { display: flex; align-items: center; gap: 13px; }.recording-copy > div { display: flex; flex-direction: column; gap: 5px; }.recording-copy strong { color: #9f2020; font-size: .88em; }.recording-copy p { margin: 0; color: var(--muted); font-size: .68em; line-height: 1.55; }
+.recording-dot { flex: 0 0 auto; width: 16px; height: 16px; border-radius: 50%; background: #c82d2d; box-shadow: 0 0 0 7px #f8dddd; }.is-recording .recording-dot { animation: recording-pulse 1.4s ease-in-out infinite; }
+.recording-actions { display: flex; align-items: center; gap: 12px; }.recording-actions time { min-width: 56px; color: #9f2020; font-variant-numeric: tabular-nums; font-weight: 900; }.recording-button { min-width: 142px; min-height: 44px; border: 0; border-radius: 10px; padding: 0 15px; background: #b52222; color: white; font-weight: 900; cursor: pointer; }.recording-button:hover { background: #8f1717; }.recording-button:disabled { cursor: wait; opacity: .65; }
+@keyframes recording-pulse { 50% { box-shadow: 0 0 0 12px rgba(200,45,45,.12); } }
 .document-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
 .document-card { border: 1px solid var(--line); background: white; color: var(--ink); border-radius: 14px; min-height: 108px; padding: 17px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 13px; cursor: pointer; text-align: left; }
 .document-card:hover { border-color: var(--green); box-shadow: var(--shadow); }
@@ -278,6 +283,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, textarea:focus-visi
   .step-ribbon { min-height: 96px; padding: 12px 14px; overflow-x: auto; grid-template-columns: repeat(3, minmax(190px, 1fr)); }.step-ribbon div + div::before { display: none; }
   .workflow-section, .result-section { padding: 64px 18px; }.section-heading { margin-bottom: 28px; }.question-workspace { grid-template-columns: 1fr; }.suggestion-row > span { width: 100%; }
   .document-grid { grid-template-columns: 1fr; }.document-card { min-height: 91px; }.analyze-button { min-width: 0; width: 100%; }
+  .recording-card { align-items: stretch; flex-direction: column; }.recording-actions { justify-content: space-between; }.recording-button { flex: 1; }
   .result-layout { grid-template-columns: 1fr; }.visit-summary { grid-template-columns: auto 1fr; }.visit-summary button { grid-column: 1 / -1; flex-direction: row; justify-content: center; }.task-card { grid-template-columns: auto 1fr; }.calendar-one, .today-pill { grid-column: 2; justify-self: start; }
   footer { flex-direction: column; align-items: flex-start; gap: 24px; }
 }
