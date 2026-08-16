@@ -134,12 +134,21 @@ test("switches the complete preview and AI output language together", async () =
   assert.doesNotMatch(renderedInterface, />重點整理好了<|>這次醫生交代<|>問題清單<|>看診摘要<|>用藥提醒<|>後續待辦</);
 });
 
-test("prefers a natural Taiwanese Mandarin male reading voice", async () => {
-  const client = await readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8");
-  assert.match(client, /chooseTaiwaneseMaleVoice/);
-  assert.match(client, /"yunjhe"/);
+test("uses natural Taiwanese female AI speech with a device fallback", async () => {
+  const [client, server, netlify] = await Promise.all([
+    readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../server/speech.ts", import.meta.url), "utf8"),
+    readFile(new URL("../netlify.toml", import.meta.url), "utf8"),
+  ]);
+  assert.match(client, /fetch\("\/api\/speech"/);
+  assert.match(client, /chooseTaiwaneseFemaleVoice/);
+  assert.match(client, /"hsiaochen"/);
   assert.match(client, /voice\.lang\.toLowerCase\(\).*=== "zh-tw"/);
-  assert.match(client, /utterance\.rate = 0\.92/);
-  assert.match(client, /utterance\.pitch = 0\.86/);
-  assert.doesNotMatch(client, /chooseTaiwaneseFemaleVoice/);
+  assert.doesNotMatch(client, /chooseTaiwaneseMaleVoice/);
+  assert.match(server, /"gpt-audio-1\.5"/);
+  assert.match(server, /"marin"/);
+  assert.match(server, /台灣標準華語女性聲線/);
+  assert.match(server, /Cache-Control": "no-store/);
+  assert.doesNotMatch(server, /writeFile|createWriteStream|supabase|\.upload\(/);
+  assert.match(netlify, /from = "\/api\/speech"/);
 });

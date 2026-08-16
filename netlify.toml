@@ -25,6 +25,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/speech"
+  to = "/.netlify/functions/speech"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

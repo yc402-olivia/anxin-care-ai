@@ -480,24 +480,13 @@ function escapeIcs(value: string) {
   return value.replace(/\\/g, "\\\\").replace(/,/g, "\\,").replace(/;/g, "\\;").replace(/\n/g, "\\n");
 }
 
-function chooseTaiwaneseMaleVoice(voices: SpeechSynthesisVoice[]) {
+function chooseTaiwaneseFemaleVoice(voices: SpeechSynthesisVoice[]) {
   const naturalVoiceKeywords = [
     "natural",
     "enhanced",
     "premium",
     "siri",
     "google",
-  ];
-  const maleVoiceKeywords = [
-    "yunjhe",
-    "yun-jhe",
-    "yun jhe",
-    "li-mu",
-    "li mu",
-    "male",
-    "雲哲",
-    "李牧",
-    "男聲",
   ];
   const femaleVoiceKeywords = [
     "hsiaochen",
@@ -522,11 +511,10 @@ function chooseTaiwaneseMaleVoice(voices: SpeechSynthesisVoice[]) {
     .sort((voiceA, voiceB) => {
       const score = (voice: SpeechSynthesisVoice) => {
         const name = voice.name.toLowerCase();
-        const maleVoice = maleVoiceKeywords.some((keyword) => name.includes(keyword)) ? 20 : 0;
-        const femaleVoice = femaleVoiceKeywords.some((keyword) => name.includes(keyword)) ? -20 : 0;
+        const femaleVoice = femaleVoiceKeywords.some((keyword) => name.includes(keyword)) ? 20 : 0;
         const naturalVoice = naturalVoiceKeywords.some((keyword) => name.includes(keyword)) ? 8 : 0;
         const localVoice = voice.localService ? 2 : 0;
-        return maleVoice + femaleVoice + naturalVoice + localVoice;
+        return femaleVoice + naturalVoice + localVoice;
       };
 
       return score(voiceB) - score(voiceA);
@@ -581,6 +569,9 @@ export function CareCompanion() {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recordingChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<ReturnType<typeof window.setInterval> | null>(null);
+  const speechPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const speechUrlRef = useRef<string | null>(null);
+  const speechRequestRef = useRef<AbortController | null>(null);
   const t = copy[locale];
 
   useEffect(() => {
@@ -635,9 +626,23 @@ export function CareCompanion() {
     }
     mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
     recordingChunksRef.current = [];
+    speechRequestRef.current?.abort();
+    speechPlayerRef.current?.pause();
+    if (speechUrlRef.current) URL.revokeObjectURL(speechUrlRef.current);
+    window.speechSynthesis?.cancel();
   }, []);
 
   const completedCount = useMemo(() => tasks.filter((task) => task.done).length, [tasks]);
+
+  const releaseSpeechAudio = () => {
+    speechRequestRef.current?.abort();
+    speechRequestRef.current = null;
+    speechPlayerRef.current?.pause();
+    speechPlayerRef.current = null;
+    if (speechUrlRef.current) URL.revokeObjectURL(speechUrlRef.current);
+    speechUrlRef.current = null;
+    window.speechSynthesis?.cancel();
+  };
 
   const sendLoginLink = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -657,7 +662,7 @@ export function CareCompanion() {
   };
 
   const changeLocale = (nextLocale: Locale) => {
-    window.speechSynthesis?.cancel();
+    releaseSpeechAudio();
     setIsReading(false);
     setLocale(nextLocale);
     setQuestion("");
@@ -702,24 +707,65 @@ export function CareCompanion() {
     recognition.start();
   };
 
-  const speak = (text: string) => {
-    if (!("speechSynthesis" in window)) return;
-    if (isReading) {
-      window.speechSynthesis.cancel();
+  const speakWithDeviceVoice = (text: string) => {
+    if (!("speechSynthesis" in window)) {
       setIsReading(false);
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(makeSpeechFlowNaturally(text));
-    utterance.lang = "zh-TW";
-    utterance.voice = chooseTaiwaneseMaleVoice(window.speechSynthesis.getVoices()) ?? null;
-    utterance.rate = 0.92;
-    utterance.pitch = 0.86;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = locale === "zh" ? "zh-TW" : locale === "nan" ? "nan-TW" : "hak-TW";
+    utterance.voice = chooseTaiwaneseFemaleVoice(window.speechSynthesis.getVoices()) ?? null;
+    utterance.rate = 0.94;
+    utterance.pitch = 1.02;
     utterance.volume = 1;
     utterance.onend = () => setIsReading(false);
     utterance.onerror = () => setIsReading(false);
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
     setIsReading(true);
+  };
+
+  const speak = async (text: string) => {
+    if (isReading) {
+      releaseSpeechAudio();
+      setIsReading(false);
+      return;
+    }
+    const naturalText = makeSpeechFlowNaturally(text);
+    const controller = new AbortController();
+    speechRequestRef.current = controller;
+    setIsReading(true);
+    try {
+      if (!authSession?.access_token) throw new Error("AUTH_REQUIRED");
+      const response = await fetch("/api/speech", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authSession.access_token}` },
+        body: JSON.stringify({ text: naturalText, locale }),
+        signal: controller.signal,
+      });
+      if (!response.ok) throw new Error("SPEECH_UNAVAILABLE");
+      const audioUrl = URL.createObjectURL(await response.blob());
+      if (controller.signal.aborted) {
+        URL.revokeObjectURL(audioUrl);
+        return;
+      }
+      speechRequestRef.current = null;
+      speechUrlRef.current = audioUrl;
+      const player = new Audio(audioUrl);
+      speechPlayerRef.current = player;
+      const finish = () => {
+        releaseSpeechAudio();
+        setIsReading(false);
+      };
+      player.onended = finish;
+      player.onerror = finish;
+      await player.play();
+    } catch {
+      const wasCancelled = controller.signal.aborted;
+      releaseSpeechAudio();
+      if (wasCancelled) setIsReading(false);
+      else speakWithDeviceVoice(naturalText);
+    }
   };
 
   const speakIntro = () => speak(`${t.titleA}${t.titleB} ${t.intro}`);
