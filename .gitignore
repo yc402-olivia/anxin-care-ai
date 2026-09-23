@@ -43,3 +43,6 @@ yarn-error.log*
 
 # Local Netlify folder
 .netlify
+
+# Do not bind this repository to OpenAI/GPT hosting.
+.openai/
