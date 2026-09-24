@@ -8,6 +8,8 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  SUPABASE_URL = "https://ilqfvdhcissbsoxcqzjo.supabase.co"
+  SUPABASE_PUBLISHABLE_KEY = "sb_publishable_w4AunzSnsc3tXvE8mVyhaA_y8XIN0wj"
 
 [[redirects]]
   from = "/api/config"
