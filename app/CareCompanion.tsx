@@ -105,6 +105,7 @@ const copy = {
     summaryTitle: "這次看診，接下來要做的事",
     read: "唸給我聽",
     stopRead: "停止朗讀",
+    speechDisclosure: "朗讀聲音由 AI 產生。",
     calendar: "全部加入日曆",
     calendarOne: "加入日曆",
     share: "分享給家人",
@@ -238,6 +239,7 @@ const copy = {
     summaryTitle: "這擺看病，紲落來愛做的代誌",
     read: "讀予我聽",
     stopRead: "莫閣讀",
+    speechDisclosure: "朗讀的聲是 AI 產生的。",
     calendar: "全部加去日曆",
     calendarOne: "加去日曆",
     share: "分享予厝裡人",
@@ -371,6 +373,7 @@ const copy = {
     summaryTitle: "這擺看症，續下來愛做个事",
     read: "讀分𠊎聽",
     stopRead: "莫再讀",
+    speechDisclosure: "朗讀个聲係 AI 產生个。",
     calendar: "全部加入日曆",
     calendarOne: "加入日曆",
     share: "分享分屋下人",
@@ -1223,7 +1226,7 @@ export function CareCompanion() {
           <div className="result-main">
             <div className="visit-summary">
               <div className="summary-icon">{t.summaryMark}</div>
-              <div><span>{t.summaryLabel}</span><p>{summary}</p></div>
+              <div><span>{t.summaryLabel}</span><p>{summary}</p><small className="speech-disclosure">{t.speechDisclosure}</small></div>
               <button type="button" onClick={() => speak(summary)}>{isReading ? "■" : "▶"}<span>{isReading ? t.stopRead : t.read}</span></button>
             </div>
             <div className="task-header"><strong>{t.tasksLabel}</strong><span>{completedCount} / {tasks.length} {t.completedLabel}</span></div>

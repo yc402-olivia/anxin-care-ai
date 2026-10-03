@@ -138,7 +138,7 @@ export async function analyzeCareDocuments(request: Request): Promise<Response> 
   if (documents.length === 0) return jsonError("NO_DOCUMENTS", localized.noDocuments, 400);
 
   const apiKey = process.env.OPENAI_API_KEY || "";
-  const model = process.env.OPENAI_VISION_MODEL || "gpt-5.6-luna";
+  const model = process.env.OPENAI_VISION_MODEL || "gpt-4o-mini";
   if (!apiKey) return jsonError("AI_NOT_CONFIGURED", localized.notConfigured, 503);
 
   const content: Array<Record<string, unknown>> = [

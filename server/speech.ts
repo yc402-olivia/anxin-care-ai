@@ -32,7 +32,7 @@ export async function createCareSpeech(request: Request): Promise<Response> {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: process.env.OPENAI_SPEECH_MODEL || "gpt-audio-1.5",
+        model: process.env.OPENAI_SPEECH_MODEL || "gpt-4o-mini-tts",
         voice: process.env.OPENAI_SPEECH_VOICE || "marin",
         input: text,
         instructions: speechInstructions[locale],

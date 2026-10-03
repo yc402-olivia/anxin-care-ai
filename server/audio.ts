@@ -42,7 +42,7 @@ export async function analyzeCareAudio(request: Request): Promise<Response> {
   try {
     const transcriptionForm = new FormData();
     transcriptionForm.set("file", audio, audio.name || "visit.webm");
-    transcriptionForm.set("model", process.env.OPENAI_TRANSCRIPTION_MODEL || "gpt-4o-mini-transcribe");
+    transcriptionForm.set("model", process.env.OPENAI_TRANSCRIPTION_MODEL || "gpt-transcribe");
     transcriptionForm.set("response_format", "json");
     transcriptionForm.set("prompt", "這是臺灣醫療院所的醫病溝通錄音。請忠實轉錄醫師、病人與陪同者的對話，保留藥名、劑量、頻率、日期與檢查名稱。不要自行補充內容。");
 
@@ -60,7 +60,7 @@ export async function analyzeCareAudio(request: Request): Promise<Response> {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: process.env.OPENAI_SUMMARY_MODEL || process.env.OPENAI_VISION_MODEL || "gpt-5.6-luna",
+        model: process.env.OPENAI_SUMMARY_MODEL || process.env.OPENAI_VISION_MODEL || "gpt-4o-mini",
         store: false,
         input: [{
           role: "user",

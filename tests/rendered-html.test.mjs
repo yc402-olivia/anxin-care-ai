@@ -96,10 +96,23 @@ test("records visits ephemerally and never persists audio or transcripts", async
   assert.match(client, /<p>\{t\.visitKicker\}<\/p>/);
   assert.match(styles, /grid-template-columns: repeat\(4, 1fr\)/);
   assert.match(audioServer, /\/v1\/audio\/transcriptions/);
+  assert.match(audioServer, /gpt-transcribe/);
   assert.match(audioServer, /store: false/);
   assert.match(audioServer, /authenticateRequest\(request\)/);
   assert.doesNotMatch(audioServer, /supabase|\.upload\(|writeFile|createWriteStream/);
   assert.match(netlify, /from = "\/api\/analyze-audio"/);
+});
+
+test("uses the supported OpenAI speech model and discloses AI-generated audio", async () => {
+  const [client, speechServer] = await Promise.all([
+    readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../server/speech.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(speechServer, /gpt-4o-mini-tts/);
+  assert.match(speechServer, /voice: process\.env\.OPENAI_SPEECH_VOICE \|\| "marin"/);
+  assert.match(client, /朗讀聲音由 AI 產生/);
+  assert.match(client, /className="speech-disclosure"/);
 });
 
 test("omits the trial-mode storage notice", async () => {
@@ -145,7 +158,7 @@ test("uses natural Taiwanese female AI speech with a device fallback", async () 
   assert.match(client, /"hsiaochen"/);
   assert.match(client, /voice\.lang\.toLowerCase\(\).*=== "zh-tw"/);
   assert.doesNotMatch(client, /chooseTaiwaneseMaleVoice/);
-  assert.match(server, /"gpt-audio-1\.5"/);
+  assert.match(server, /"gpt-4o-mini-tts"/);
   assert.match(server, /"marin"/);
   assert.match(server, /台灣標準華語女性聲線/);
   assert.match(server, /Cache-Control": "no-store/);
