@@ -2,7 +2,9 @@ import { authenticateRequest } from "./auth.ts";
 import { jsonError, noStoreJson } from "./http.ts";
 import { analysisSchema, extractOutputText, normalizeAnalysisResult, responseCopy, type Locale } from "./analyze.ts";
 
-const MAX_AUDIO_BYTES = 5_000_000;
+// Netlify's buffered request limit is 6 MB. Binary request bodies gain roughly
+// 30% Base64 overhead in transit, so stay safely below the effective limit.
+const MAX_AUDIO_BYTES = 4_000_000;
 const supportedAudioTypes = new Set(["audio/webm", "audio/mp4", "audio/mpeg", "audio/ogg", "audio/wav", "audio/x-m4a"]);
 
 export async function analyzeCareAudio(request: Request): Promise<Response> {

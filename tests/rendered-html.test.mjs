@@ -165,3 +165,22 @@ test("uses natural Taiwanese female AI speech with a device fallback", async () 
   assert.doesNotMatch(server, /writeFile|createWriteStream|supabase|\.upload\(/);
   assert.match(netlify, /from = "\/api\/speech"/);
 });
+
+test("keeps Netlify AI requests within payload and rate limits", async () => {
+  const [client, analysisServer, audioServer, analysisFunction, audioFunction, speechFunction] = await Promise.all([
+    readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../server/analyze.ts", import.meta.url), "utf8"),
+    readFile(new URL("../server/audio.ts", import.meta.url), "utf8"),
+    readFile(new URL("../netlify/functions/analyze.ts", import.meta.url), "utf8"),
+    readFile(new URL("../netlify/functions/analyze-audio.ts", import.meta.url), "utf8"),
+    readFile(new URL("../netlify/functions/speech.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(client, /MAX_IMAGE_DATA_URL_LENGTH = 700_000/);
+  assert.match(client, /canvas\.toDataURL\("image\/jpeg"/);
+  assert.match(analysisServer, /MAX_DOCUMENT_PAYLOAD_LENGTH = 4_800_000/);
+  assert.match(audioServer, /MAX_AUDIO_BYTES = 4_000_000/);
+  assert.match(analysisFunction, /rateLimit/);
+  assert.match(audioFunction, /rateLimit/);
+  assert.match(speechFunction, /rateLimit/);
+});

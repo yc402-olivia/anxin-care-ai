@@ -6,6 +6,9 @@ type DocumentInput = { kind?: unknown; name?: unknown; dataUrl?: unknown };
 type CareTaskType = "medication" | "test" | "visit";
 export type Locale = "zh" | "nan" | "hak";
 
+const MAX_DOCUMENT_DATA_URL_LENGTH = 750_000;
+const MAX_DOCUMENT_PAYLOAD_LENGTH = 4_800_000;
+
 const taskTypes = new Set<CareTaskType>(["medication", "test", "visit"]);
 
 export const responseCopy = {
@@ -131,11 +134,17 @@ export async function analyzeCareDocuments(request: Request): Promise<Response> 
     : [];
   const documents = Array.isArray(input.documents)
     ? (input.documents as DocumentInput[]).slice(0, 6).filter((document) =>
-        typeof document.dataUrl === "string" && document.dataUrl.startsWith("data:image/") && document.dataUrl.length < 9_000_000,
+        typeof document.dataUrl === "string"
+        && document.dataUrl.startsWith("data:image/")
+        && document.dataUrl.length <= MAX_DOCUMENT_DATA_URL_LENGTH,
       )
     : [];
 
   if (documents.length === 0) return jsonError("NO_DOCUMENTS", localized.noDocuments, 400);
+  const totalDocumentPayload = documents.reduce((total, document) => total + String(document.dataUrl).length, 0);
+  if (totalDocumentPayload > MAX_DOCUMENT_PAYLOAD_LENGTH) {
+    return jsonError("DOCUMENTS_TOO_LARGE", "照片總容量過大，請減少照片後重新整理。", 413);
+  }
 
   const apiKey = process.env.OPENAI_API_KEY || "";
   const model = process.env.OPENAI_VISION_MODEL || "gpt-4o-mini";

@@ -532,13 +532,48 @@ function makeSpeechFlowNaturally(text: string) {
     .trim();
 }
 
-function fileToDataUrl(file: File) {
+const MAX_IMAGE_DATA_URL_LENGTH = 700_000;
+const MAX_IMAGE_DIMENSION = 1_600;
+
+function readFileAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+}
+
+async function fileToDataUrl(file: File) {
+  const original = await readFileAsDataUrl(file);
+  if (original.length <= MAX_IMAGE_DATA_URL_LENGTH) return original;
+
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const candidate = new Image();
+    candidate.onload = () => resolve(candidate);
+    candidate.onerror = () => reject(new Error("IMAGE_DECODE_FAILED"));
+    candidate.src = original;
+  });
+
+  let scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight));
+  let quality = 0.82;
+  let compressed = original;
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("IMAGE_PROCESSING_UNAVAILABLE");
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    compressed = canvas.toDataURL("image/jpeg", quality);
+    if (compressed.length <= MAX_IMAGE_DATA_URL_LENGTH) return compressed;
+    if (quality > 0.52) quality -= 0.1;
+    else scale *= 0.82;
+  }
+
+  if (compressed.length > MAX_IMAGE_DATA_URL_LENGTH) throw new Error("IMAGE_TOO_LARGE");
+  return compressed;
 }
 
 export function CareCompanion() {
