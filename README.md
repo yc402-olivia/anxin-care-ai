@@ -18,7 +18,8 @@ npm run build:netlify
 ```
 
 - Netlify 設定在 `netlify.toml`，Functions 位於 `netlify/functions/`。
-- Supabase SQL 位於 `supabase/migrations/`；請在 Supabase 啟用 Anonymous Sign-ins。
+- Supabase SQL 位於 `supabase/migrations/`；正式站使用 Email magic link 登入，請啟用 Email provider、新使用者註冊與 Email 驗證，並保持 Anonymous Sign-ins 關閉。
+- Supabase 的 Site URL 為 `https://anxincare.netlify.app`，允許的 Redirect URL 為 `https://anxincare.netlify.app/**`。
 - 環境變數範例在 `.env.example`。公開端只取得 Supabase publishable key，OpenAI 與 Supabase secret key 僅留在伺服器端。
 - 正式環境請把 `OPENAI_API_KEY` 設為 Netlify 的加密 Secret，絕對不要寫入 GitHub 或任何前端環境變數。
 - 預設使用 `gpt-4o-mini` 整理照片與摘要、`gpt-transcribe` 轉錄看診錄音、`gpt-4o-mini-tts` 產生朗讀。這些名稱可用環境變數覆寫。
