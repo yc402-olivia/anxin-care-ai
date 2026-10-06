@@ -178,6 +178,9 @@ const copy = {
     authSafety: "安心陪診只協助整理與提醒，不提供診斷或更改醫囑。",
     loginSending: "正在寄送登入連結…",
     loginFailedPrefix: "無法寄送",
+    loginRateLimited: "寄送太頻繁，請等待 60 秒後再試。",
+    loginEmailUnauthorized: "目前寄信服務尚未開放給這個信箱，請聯絡管理者完成正式寄信設定。",
+    loginWait: "請稍候",
     loginSent: "登入連結已寄出，請到 Gmail 信箱點擊後回到這個頁面。",
     previewSummary: "完成看診中的錄音後，醫病溝通重點會整理在這裡。",
     previewMedication: "依藥袋標示的次數與時間服用，不自行增減藥量。",
@@ -312,6 +315,9 @@ const copy = {
     authSafety: "安心陪診干焦協助整理佮提醒，無提供診斷抑是改醫囑。",
     loginSending: "咧寄登入連結…",
     loginFailedPrefix: "寄袂出去",
+    loginRateLimited: "寄傷密矣，請等 60 秒閣試一擺。",
+    loginEmailUnauthorized: "目前寄批服務猶未開放予這个信箱，請聯絡管理者完成正式寄批設定。",
+    loginWait: "請等一下",
     loginSent: "登入連結寄出去矣，請去 Gmail 信箱撳連結了後轉來這个頁面。",
     previewSummary: "看醫生當中的錄音完成了後，醫病溝通重點會整理佇遮。",
     previewMedication: "照藥袋頂懸寫的次數佮時間食藥，毋通家己加減藥量。",
@@ -446,6 +452,9 @@ const copy = {
     authSafety: "安心陪診淨係協助整理同提醒，毋會診斷抑係改醫囑。",
     loginSending: "寄等登入連結…",
     loginFailedPrefix: "寄毋出",
+    loginRateLimited: "寄忒密哩，請等 60 秒過後再試。",
+    loginEmailUnauthorized: "這下寄信服務還吂開放分這隻信箱，請聯絡管理者完成正式寄信設定。",
+    loginWait: "請等一下",
     loginSent: "登入連結寄出哩，請去 Gmail 信箱撳連結過後轉來這隻頁面。",
     previewSummary: "看症當中个錄音完成過後，醫病溝通重點會整理在這。",
     previewMedication: "照藥袋頂項標个擺數同時間食藥，毋好自家加減藥量。",
@@ -600,7 +609,9 @@ export function CareCompanion() {
   const [authConfigured, setAuthConfigured] = useState(true);
   const [loginEmail, setLoginEmail] = useState("");
   const [authMessage, setAuthMessage] = useState("");
+  const [authMessageKind, setAuthMessageKind] = useState<"success" | "error">("success");
   const [loginSubmitting, setLoginSubmitting] = useState(false);
+  const [loginCooldown, setLoginCooldown] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -656,6 +667,12 @@ export function CareCompanion() {
     return () => documents.forEach((document) => URL.revokeObjectURL(document.preview));
   }, [documents]);
 
+  useEffect(() => {
+    if (loginCooldown <= 0) return;
+    const timer = window.setTimeout(() => setLoginCooldown((seconds) => Math.max(0, seconds - 1)), 1_000);
+    return () => window.clearTimeout(timer);
+  }, [loginCooldown]);
+
   useEffect(() => () => {
     if (recordingTimerRef.current) window.clearInterval(recordingTimerRef.current);
     if (mediaRecorderRef.current?.state === "recording") {
@@ -684,14 +701,30 @@ export function CareCompanion() {
 
   const sendLoginLink = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!supabase || !loginEmail.trim()) return;
+    if (!supabase || !loginEmail.trim() || loginCooldown > 0) return;
     setLoginSubmitting(true);
+    setAuthMessageKind("success");
     setAuthMessage(t.loginSending);
     const { error } = await supabase.auth.signInWithOtp({
       email: loginEmail.trim(),
       options: { emailRedirectTo: `${window.location.origin}/`, shouldCreateUser: true },
     });
-    setAuthMessage(error ? t.loginFailedPrefix : t.loginSent);
+    if (error) {
+      setAuthMessageKind("error");
+      const normalizedError = `${error.code || ""} ${error.message || ""}`.toLowerCase();
+      if (error.status === 429 || normalizedError.includes("rate limit") || normalizedError.includes("security purposes")) {
+        setAuthMessage(t.loginRateLimited);
+        setLoginCooldown(60);
+      } else if (normalizedError.includes("email address not authorized")) {
+        setAuthMessage(t.loginEmailUnauthorized);
+      } else {
+        setAuthMessage(`${t.loginFailedPrefix}：${error.message || t.loginFailedPrefix}`);
+      }
+    } else {
+      setAuthMessageKind("success");
+      setAuthMessage(t.loginSent);
+      setLoginCooldown(60);
+    }
     setLoginSubmitting(false);
   };
 
@@ -1075,12 +1108,14 @@ export function CareCompanion() {
             <form className="login-form" onSubmit={sendLoginLink}>
               <label htmlFor="login-email">{t.emailLabel}</label>
               <input id="login-email" type="email" inputMode="email" autoComplete="email" placeholder="name@gmail.com" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} required />
-              <button type="submit" disabled={loginSubmitting}>{loginSubmitting ? t.sendingLink : t.sendLink}<span>→</span></button>
+              <button type="submit" disabled={loginSubmitting || loginCooldown > 0}>
+                {loginSubmitting ? t.sendingLink : loginCooldown > 0 ? `${t.loginWait} ${loginCooldown}s` : t.sendLink}<span>→</span>
+              </button>
             </form>
           ) : (
             <div className="auth-error">{t.authNotConfigured}</div>
           )}
-          {authMessage && <p className="auth-message" role="status">{authMessage}</p>}
+          {authMessage && <p className={authMessageKind === "error" ? "auth-error" : "auth-message"} role="status">{authMessage}</p>}
           <div className="auth-points"><span>✓ {t.authNoPassword}</span><span>✓ {t.authSeparateData}</span><span>✓ {t.authAnytimeSignOut}</span></div>
           <p className="auth-safety">{t.authSafety}</p>
         </section>

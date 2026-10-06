@@ -56,6 +56,15 @@ test("requires Supabase authentication for AI analysis", async () => {
   assert.match(server, /authenticateRequest\(request\)/);
 });
 
+test("protects magic-link delivery from accidental repeat requests", async () => {
+  const client = await readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8");
+  assert.match(client, /loginCooldown > 0/);
+  assert.match(client, /setLoginCooldown\(60\)/);
+  assert.match(client, /error\.status === 429/);
+  assert.match(client, /email address not authorized/);
+  assert.match(client, /authMessageKind === "error"/);
+});
+
 test("turns uploaded care documents into structured follow-up tasks", async () => {
   const [client, server] = await Promise.all([
     readFile(new URL("../app/CareCompanion.tsx", import.meta.url), "utf8"),
